@@ -18,23 +18,24 @@ program
 let terminalWidth = process.stdout.columns;
 const parseWidth = files => {
 	let output = files.join(' ');
-	let lines = Math.ceil(output.length / terminalWidth)
 	let count = 1;
-	while (lines) {
+	let lines;
+	do {
+		lines = Math.floor(output.length / terminalWidth);
 		//place 'cursor' at end
 		let spaces = 0;
 		let cursor = terminalWidth * count - spaces;
 		//trace back to [
-		while (output[cursor] !== "[") { 
+		while (output[cursor] !== "[" && output[cursor] !== "]") {
 			spaces++;
 			cursor = terminalWidth * count - spaces;
 		}
-		//insert number of spaces traversed
-		// this.substring(0, index) + string + this.substring(index, this.length);
-		output = output.substring(0,cursor) + " ".repeat(spaces) + output.substring(cursor,output.length);
-		lines--;
+		//insert number of spaces traversed if bracket was broken
+		if (output[cursor] === "[") {
+			output = output.substring(0, cursor) + " ".repeat(spaces) + output.substring(cursor, output.length);
+		}
 		count++;
-	}
+	} while (count <= lines);
 	return output;
 }
  
@@ -51,6 +52,7 @@ const parseWidth = files => {
 			let folders = stats.reduce((acc,nxt,idx) => nxt.isDirectory() ? [...acc, `[\uF115 ${filenames[idx]}]`] : acc, []);
 			if (folders.length) {
 				log(blueLog(parseWidth(folders)));
+				if (!program.dir) { log(''); }
 			}
 		}
 		// Filters by files
