@@ -7,13 +7,12 @@ let icons = {
 	log: "\uF0F6",
 	zip: "\uF1C6",
 	img: "\uF1C5",
-	pdf: "\uF1C1",
+	pdf: "\uF411",
 	vid: "\uF1C8",
 	audio: "\uF1C7",
+	bin: "\uF471",
 	git: "\uF7A1"
 }
-
-
 
 const addIcon = file => {
 	const i = icon => `[${icon} ${file}]`;
@@ -24,17 +23,34 @@ const addIcon = file => {
 			return i(icons.zip);
 		case '.js':
 		case '.ts':
+		case '.c':
+		case '.cpp':
+		case '.html':
+		case '.css':
 			return i(icons.code);
 		case '.jpg':
 		case '.jpeg':
 		case '.png':
+		case '.ico':
 			return i(icons.img);
+		case '.avi':
+		case '.mp4':
+		case '.mov':
+		case '.flv':
+			return i(icons.vid);
+		case '.mp3':
+		case '.wav':
+		case '.flac':
+		case '.':
+			return i(icons.audio);
 		case '.ini':
 		case '.log':
+		case '.txt':
 		case '.json':
+		case '.md':
 			return i(icons.log);
-		case '.gitignore':
-			return i(icons.git);
+		case '.pdf':
+			return i(icons.pdf);
 		default:
 			return i(icons.file);
 	}
