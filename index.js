@@ -24,12 +24,12 @@ const parseWidth = files => {
 		lines = Math.floor(output.length / terminalWidth);
 		//place 'cursor' at end
 		let spaces = 0;
-		let cursor = terminalWidth * count - spaces;
-		//trace back to [
-		while (output[cursor] !== "[" && output[cursor] !== "]") {
+		let cursor;
+		//trace back to first bracked
+		do {
 			spaces++;
 			cursor = terminalWidth * count - spaces;
-		}
+		} while (output[cursor] !== "[" && output[cursor] !== "]");
 		//insert number of spaces traversed if bracket was broken
 		if (output[cursor] === "[") {
 			output = output.substring(0, cursor) + " ".repeat(spaces) + output.substring(cursor, output.length);
