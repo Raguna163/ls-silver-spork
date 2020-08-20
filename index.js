@@ -8,7 +8,7 @@ const log = console.log;
 const blueLog = chalk.rgb(173, 235, 235);
 const pinkLog = chalk.rgb(235, 173, 235);
 
-program.version('0.1.0');
+program.version('0.2.0');
 program
 	.option('-d, --dir','prints directories')
 	.option('-f, --file','prints files')
