@@ -52,9 +52,9 @@ const parseWidth = files => {
 			let folders = stats.reduce((acc,nxt,idx) => nxt.isDirectory() ? [...acc, `[\uF115 ${filenames[idx]}]`] : acc, []);
 			if (folders.length) {
 				log(blueLog(parseWidth(folders)));
-				if (!program.dir) { log(''); }
 			}
 		}
+		if (!program.file && !program.dir) { log('') }
 		// Filters by files
 		if (!program.dir) {
 			let files = stats.reduce((acc,nxt,idx) => nxt.isFile() ? [...acc, addIcon(filenames[idx])] : acc, []);
