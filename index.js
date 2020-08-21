@@ -14,7 +14,7 @@ program
 	.option('-f, --file','prints files (cannot be used with -d)')
 	.parse(process.argv);
 
-if (program.dir && program.dir) { log("Invalid argument combination\n Try ls -h for more help"); return }
+if (program.file && program.dir) { log("Invalid argument combination\nTry ls -h for more help"); return }
 
 // Finds where to add spaces to make sure file/folder names aren't cut off
 let terminalWidth = process.stdout.columns;
@@ -40,26 +40,28 @@ const parseWidth = files => {
 	} while (count <= lines);
 	return output;
 }
- 
+
+
+
 (async () => {
 	try {
 		const dir = process.cwd();
 		log(chalk.whiteBright(`\nCONTENTS OF ${dir}:\n`));
 		// Get list of filenames and request file stats for each file
-		const filenames = await fs.readdir(dir);
-		const fileStats = filenames.map(filename => fs.lstat(path.join(dir,filename)));
-		const stats = await Promise.all(fileStats);
+		const filenames = await fs.readdir(dir,{ withFileTypes: true });
+		// const fileStats = filenames.map(filename => fs.lstat(path.join(dir,filename)));
+		// const stats = await Promise.all(fileStats);
 		// Filters by folders
 		let folders;
 		if (!program.file) {
-			folders = stats.reduce((acc,nxt,idx) => nxt.isDirectory() ? [...acc, `[\uF115 ${filenames[idx]}]`] : acc, []);
+			folders = filenames.reduce((acc,nxt,idx) => nxt.isDirectory() ? [...acc, `[\uF115 ${filenames[idx].name}]`] : acc, []);
 			if (folders.length) {
 				log(blueLog(parseWidth(folders)));
 			}
 		}
 		// Filters by files
 		if (!program.dir) {
-			let files = stats.reduce((acc,nxt,idx) => nxt.isFile() ? [...acc, addIcon(filenames[idx])] : acc, []);
+			let files = filenames.reduce((acc,nxt,idx) => nxt.isFile() ? [...acc, addIcon(filenames[idx].name)] : acc, []);
 			if (files.length) {
 				if (folders.length) { log('') }
 				log(pinkLog(parseWidth(files)));
