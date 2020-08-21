@@ -8,11 +8,13 @@ const log = console.log;
 const blueLog = chalk.rgb(173, 235, 235);
 const pinkLog = chalk.rgb(235, 173, 235);
 
-program.version('0.2.1');
+program.version('0.2.2');
 program
-	.option('-d, --dir','prints directories')
-	.option('-f, --file','prints files')
+	.option('-d, --dir','prints directories (cannot be used with -f)')
+	.option('-f, --file','prints files (cannot be used with -d)')
 	.parse(process.argv);
+
+if (program.dir && program.dir) { log("Invalid argument combination\n Try ls -h for more help"); return }
 
 // Finds where to add spaces to make sure file/folder names aren't cut off
 let terminalWidth = process.stdout.columns;
