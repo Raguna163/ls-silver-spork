@@ -8,7 +8,7 @@ const log = console.log;
 const blueLog = chalk.rgb(173, 235, 235);
 const pinkLog = chalk.rgb(235, 173, 235);
 
-program.version('0.2.0');
+program.version('0.2.1');
 program
 	.option('-d, --dir','prints directories')
 	.option('-f, --file','prints files')
@@ -22,14 +22,14 @@ const parseWidth = files => {
 	let lines;
 	do {
 		lines = Math.floor(output.length / terminalWidth);
-		//place 'cursor' at end
 		let spaces = 0;
 		let cursor;
 		//trace back to first bracket
 		do {
 			spaces++;
+			//place 'cursor' at end
 			cursor = terminalWidth * count - spaces;
-		} while (output[cursor] !== "[" && output[cursor] !== "]");
+		} while (output[cursor] !== "[" && output[cursor] !== "]" && spaces < terminalWidth - 1);
 		//insert number of spaces traversed if bracket was broken
 		if (output[cursor] === "[") {
 			output = output.substring(0, cursor) + " ".repeat(spaces) + output.substring(cursor, output.length);
