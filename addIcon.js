@@ -1,56 +1,96 @@
 const path = require('path');	
 
 let icons = {
-	code: "\uF1C9",
-	folder: "\uF115",
-	file: "\uF016",
-	log: "\uF0F6",
-	zip: "\uF1C6",
-	img: "\uF1C5",
-	pdf: "\uF411",
-	vid: "\uF1C8",
 	audio: "\uF1C7",
 	bin: "\uF471",
-	git: "\uF7A1"
+	c: "\uFB70",
+	cs: "\uF81A",
+	css: "\uE614",
+	code: "\uF1C9",
+	cpp: "\uFB71",
+	folder: "\uF115",
+	font: "\uFBD4",
+	file: "\uF016",
+	img: "\uF1C5",
+	js: "\uE74E",
+	json: "\uE60B",
+	log: "\uF0F6",
+	pdf: "\uF411",
+	py: "\uF820",
+	ts: "\uE628",
+	vid: "\uF1C8",
+	zip: "\uF1C6"
 }
 
 const addIcon = file => {
 	const i = icon => `[${icon} ${file}]`;
-	switch (path.parse(file).ext) {
-		case '.zip':
-		case '.rar':
-		case '.7z':
-			return i(icons.zip);
-		case '.js':
-		case '.ts':
-		case '.c':
+	const { ext } = path.parse(file);
+	switch (ext) {
 		case '.cpp':
-		case '.html':
+		case '.c':
+		case '.cs':
 		case '.css':
+		case '.json':
+		case '.js':
+		case '.pdf':
+		case '.ts':
+		case '.py':
+			return i(icons[ext.substring(1)]); 
+		case '.flac':
+		case '.mp3':
+		case '.wav':
+		case '.wma':
+			return i(icons.audio);
+		case '.bak':
+		case '.bin':
+		case '.exe':
+		case '.iso':
+		case '.msi':
+			return i(icons.bin);
+		case '.bat':
+		case '.h':
+		case '.html':
+		case '.xml':
 			return i(icons.code);
+		case '.otf':
+		case '.ttf':
+			return i(icons.font);
+		case '.gif':
+		case '.ico':
 		case '.jpg':
 		case '.jpeg':
 		case '.png':
-		case '.ico':
+		case '.raw':
+		case '.svg':
+		case '.tif':
 			return i(icons.img);
-		case '.avi':
-		case '.mp4':
-		case '.mov':
-		case '.flv':
-			return i(icons.vid);
-		case '.mp3':
-		case '.wav':
-		case '.flac':
-		case '.':
-			return i(icons.audio);
+		case '.csv':
+		case '.db':
+		case '.dll':
+		case '.doc':
+		case '.docx':
 		case '.ini':
 		case '.log':
-		case '.txt':
-		case '.json':
 		case '.md':
+		case '.odt':
+		case '.rtf':
+		case '.sav':
+		case '.txt':
 			return i(icons.log);
-		case '.pdf':
-			return i(icons.pdf);
+		case '.3gp':
+		case '.avi':
+		case '.flv':
+		case '.mkv':
+		case '.mov':
+		case '.mp4':
+		case '.mpg':
+		case '.mpeg':
+		case '.wmv':
+			return i(icons.vid);
+		case '.7z':
+		case '.rar':
+		case '.zip':
+			return i(icons.zip);
 		default:
 			return i(icons.file);
 	}
