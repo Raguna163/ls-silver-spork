@@ -25,7 +25,7 @@ const parseWidth = files => {
 		//place 'cursor' at end
 		let spaces = 0;
 		let cursor;
-		//trace back to first bracked
+		//trace back to first bracket
 		do {
 			spaces++;
 			cursor = terminalWidth * count - spaces;
@@ -48,17 +48,18 @@ const parseWidth = files => {
 		const fileStats = filenames.map(filename => fs.lstat(path.join(dir,filename)));
 		const stats = await Promise.all(fileStats);
 		// Filters by folders
+		let folders;
 		if (!program.file) {
-			let folders = stats.reduce((acc,nxt,idx) => nxt.isDirectory() ? [...acc, `[\uF115 ${filenames[idx]}]`] : acc, []);
+			folders = stats.reduce((acc,nxt,idx) => nxt.isDirectory() ? [...acc, `[\uF115 ${filenames[idx]}]`] : acc, []);
 			if (folders.length) {
 				log(blueLog(parseWidth(folders)));
 			}
 		}
-		if (!program.file && !program.dir) { log('') }
 		// Filters by files
 		if (!program.dir) {
 			let files = stats.reduce((acc,nxt,idx) => nxt.isFile() ? [...acc, addIcon(filenames[idx])] : acc, []);
 			if (files.length) {
+				if (folders.length) { log('') }
 				log(pinkLog(parseWidth(files)));
 			}
 		}
