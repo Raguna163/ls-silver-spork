@@ -1,5 +1,6 @@
 const path = require('path');	
 
+// Source: https://www.nerdfonts.com/cheat-sheet
 let icons = {
 	audio: "\uF1C7",
 	bin: "\uF471",
@@ -11,10 +12,13 @@ let icons = {
 	folder: "\uF115",
 	font: "\uFBD4",
 	file: "\uF016",
+	git: "\uE702",
+	googledrive: "\uE731",
 	img: "\uF1C5",
 	js: "\uE74E",
 	json: "\uE60B",
 	log: "\uF0F6",
+	nodejs: "\uF898",
 	pdf: "\uF411",
 	py: "\uF820",
 	ts: "\uE628",
@@ -24,7 +28,18 @@ let icons = {
 
 const addIcon = file => {
 	const i = icon => `[${icon} ${file.name}]`;
-	if (file.isDirectory()) return i(icons.folder)
+	if (file.isDirectory()) {
+		switch (file.name) {
+			case 'Google Drive':
+				return i(icons.googledrive);
+			case '.git':
+				return i(icons.git);
+			case 'node_modules':
+				return i(icons.nodejs);
+			default:
+				return i(icons.folder);
+		}
+	}
 	const { ext } = path.parse(file.name);
 	switch (ext) {
 		case '.cpp':
