@@ -7,6 +7,7 @@ const addIcon = require('./addIcon');
 const whiteLog = text => console.log(chalk.rgb(255, 255, 255)(text));
 const blueLog = text => console.log(chalk.rgb(173, 235, 235)(text));
 const pinkLog = text => console.log(chalk.rgb(235, 173, 235)(text));
+const redLog = text => console.log(chalk.rgb(242, 56, 56)(text));
 
 program.version('0.3.0');
 program
@@ -14,7 +15,7 @@ program
 	.option('-f, --file','prints files (cannot be used with -d)')
 	.parse(process.argv);
 
-if (program.file && program.dir) { console.log("Invalid argument combination\nTry ls -h for more help"); return }
+if (program.file && program.dir) { redlog("Invalid argument combination\nTry ls -h for more help"); return }
 
 // Finds where to add spaces to make sure file/folder names aren't cut off
 let terminalWidth = process.stdout.columns;
@@ -43,24 +44,30 @@ const parseWidth = files => {
 
 const fileOrDir = (files, func) => files.reduce((acc,nxt,idx) => nxt[func]() ? [...acc, files[idx].name] : acc, []);
 
-(async () => {
+const readDirectory = async () => {
 	try {
 		const dir = process.cwd();
 		whiteLog(`\nCONTENTS OF ${dir}:\n`);
 		// Get list of filenames and request file stats for each file
-		const filenames = await fs.promises.readdir(dir,{ withFileTypes: true });
+		const filenames = await fs.promises.readdir(dir, { withFileTypes: true });
 		// const fileStats = filenames.map(filename => fs.lstat(path.join(dir,filename)));
 		// const stats = await Promise.all(fileStats);
 		filenames.forEach(file => file.name = addIcon(file));
 		let folders = fileOrDir(filenames, 'isDirectory');
-		let files = fileOrDir(filenames,'isFile');
-		if (!program.file) {  
-			blueLog(parseWidth(folders)); 
-		}
-		if (!program.dir) { 
-			pinkLog(parseWidth(files)); 
-		}
-	} catch (err) {
-		console.log(err);
-	} 
+		let files = fileOrDir(filenames, 'isFile');
+		return { folders, files };
+	} catch (error) {
+		redLog(err);
+	}
+}
+
+(async () => {
+	const { folders, files } = await readDirectory();
+	if (!folders.length && !files.length) { whiteLog('Directory Empty'); }
+	if (!program.file && folders.length) {
+		blueLog(parseWidth(folders));
+	}
+	if (!program.dir && files.length) {
+		pinkLog(parseWidth(files));
+	}
 })();
