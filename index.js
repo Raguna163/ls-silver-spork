@@ -9,7 +9,7 @@ const blueLog = text => console.log(chalk.rgb(173, 235, 235)(text));
 const pinkLog = text => console.log(chalk.rgb(235, 173, 235)(text));
 const redLog = text => console.log(chalk.rgb(242, 56, 56)(text));
 
-program.version('0.5.0');
+program.version('0.6.0');
 program
 	.option('-d, --dir','prints directories (cannot be used with -f or -c)')
 	.option('-f, --file','prints files (cannot be used with -d)')
