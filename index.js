@@ -9,15 +9,18 @@ const blueLog = text => console.log(chalk.rgb(173, 235, 235)(text));
 const pinkLog = text => console.log(chalk.rgb(235, 173, 235)(text));
 const redLog = text => console.log(chalk.rgb(242, 56, 56)(text));
 
-program.version('0.6.0');
+program.name("ls").usage("[directory] [options]").version('0.7.0');
 program
-	.option('-d, --dir','prints directories (cannot be used with -f or -c)')
+	.option('-d, --dir','prints directories (cannot be used with -f or -s)')
 	.option('-f, --file','prints files (cannot be used with -d)')
 	.option('-s, --size','prints file sizes (cannot be used with -d)')
 	.option('-c, --columns','prints as one or two columns')
 	.parse(process.argv);
 
-if (program.file || program.columns && program.dir) { redLog(`\nInvalid argument combination: ${process.argv.slice(2)}\nTry "ls -h" for more help`); return }
+if (program.file && program.dir || program.dir && program.columns || program.args.length > 1) { 
+	redLog(`\nInvalid argument combination: ${process.argv.slice(2)}\nTry "ls -h" for more help`); 
+	return;
+}
 
 // Finds where to add spaces to make sure file/folder names aren't cut off
 let terminalWidth = process.stdout.columns;
@@ -50,7 +53,7 @@ const fileOrDir = (files, func) => files.reduce((acc,nxt,idx) => nxt[func]() ? [
 
 const readDirectory = async () => {
 	try {
-		const dir = process.cwd();
+		const dir = path.join(process.cwd(),program.args.length ? program.args[0] : "");
 		whiteLog(`\nCONTENTS OF ${dir}:\n`);
 		// Get list of filenames and request file stats for each file
 		const filenames = await fs.promises.readdir(dir, { withFileTypes: true });
@@ -71,7 +74,7 @@ const readDirectory = async () => {
 (async () => {
 	const { folders, files } = await readDirectory();
 
-	if (!folders.length && !files.length) { whiteLog('Directory Empty'); }
+	if (!folders.length && !files.length) { whiteLog('Directory Empty'); return; }
 	else if (!folders.length && program.dir) { whiteLog('No Folders, try removing flag'); }
 	else if (!files.length && program.file) { whiteLog('No Files, try removing flag'); }
 
