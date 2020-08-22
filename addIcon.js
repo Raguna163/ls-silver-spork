@@ -27,7 +27,7 @@ let icons = {
 }
 
 const addIcon = file => {
-	const i = icon => `[${icon} ${file.name}]`;
+	const i = icon => `[${file.size ? file.size + " Bytes " : ""}${icon} ${file.name}]`;
 	if (file.isDirectory()) {
 		switch (file.name) {
 			case 'Google Drive':

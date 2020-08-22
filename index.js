@@ -13,6 +13,7 @@ program.version('0.3.0');
 program
 	.option('-d, --dir','prints directories (cannot be used with -f)')
 	.option('-f, --file','prints files (cannot be used with -d)')
+	.option('-s, --size','prints file sizes')
 	.parse(process.argv);
 
 if (program.file && program.dir) { redlog("Invalid argument combination\nTry ls -h for more help"); return }
@@ -50,24 +51,32 @@ const readDirectory = async () => {
 		whiteLog(`\nCONTENTS OF ${dir}:\n`);
 		// Get list of filenames and request file stats for each file
 		const filenames = await fs.promises.readdir(dir, { withFileTypes: true });
-		// const fileStats = filenames.map(filename => fs.lstat(path.join(dir,filename)));
-		// const stats = await Promise.all(fileStats);
+		if (program.size) {
+			const fileStats = filenames.map(filename => fs.promises.lstat(path.join(dir, filename.name)));
+			const stats = await Promise.all(fileStats);
+			filenames.forEach((file,idx) => file.size = stats[idx].size);
+		}
 		filenames.forEach(file => file.name = addIcon(file));
 		let folders = fileOrDir(filenames, 'isDirectory');
 		let files = fileOrDir(filenames, 'isFile');
 		return { folders, files };
-	} catch (error) {
+	} catch (err) {
 		redLog(err);
 	}
 }
 
 (async () => {
 	const { folders, files } = await readDirectory();
+
 	if (!folders.length && !files.length) { whiteLog('Directory Empty'); }
+	else if (!folders.length && program.dir) { whiteLog('No Folders, try removing flag'); }
+	else if (!files.length && program.file) { whiteLog('No Files, try removing flag'); }
+
 	if (!program.file && folders.length) {
 		blueLog(parseWidth(folders));
 	}
 	if (!program.dir && files.length) {
+		if (folders.length && !program.file) { console.log('') }
 		pinkLog(parseWidth(files));
 	}
 })();
