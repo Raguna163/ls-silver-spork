@@ -26,8 +26,16 @@ let icons = {
 	zip: "\uF1C6"
 }
 
+const formatSize = size => {
+	if (size > 1073741824) { return `${(size / 1073741824).toFixed(2)} GB ` }
+	if (size > 1048576) { return `${(size / 1048576).toFixed(2)} MB ` }
+	else if (size > 1024) { return `${(size / 1024).toFixed(2)} KB ` }
+	else if (size > 0) { return `${size} B ` }
+	else { return '' }
+}
+
 const formatFile = file => {
-	const i = icon => `[${file.size ? file.size + " Bytes " : ""}${icon} ${file.name}]`;
+	const i = icon => `[${formatSize(file.size)}${icon} ${file.name}]`;
 	if (file.isDirectory()) {
 		switch (file.name) {
 			case 'Google Drive':
