@@ -11,13 +11,13 @@ const redLog = text => console.log(chalk.rgb(242, 56, 56)(text));
 
 program.version('0.5.0');
 program
-	.option('-d, --dir','prints directories (cannot be used with -f)')
+	.option('-d, --dir','prints directories (cannot be used with -f or -c)')
 	.option('-f, --file','prints files (cannot be used with -d)')
 	.option('-s, --size','prints file sizes (cannot be used with -d)')
 	.option('-c, --columns','prints as one or two columns')
 	.parse(process.argv);
 
-if (program.file || program.columns && program.dir) { redLog(`Invalid argument combination: ${process.argv.slice(2)}\nTry ls -h for more help`); return }
+if (program.file || program.columns && program.dir) { redLog(`\nInvalid argument combination: ${process.argv.slice(2)}\nTry "ls -h" for more help`); return }
 
 // Finds where to add spaces to make sure file/folder names aren't cut off
 let terminalWidth = process.stdout.columns;
