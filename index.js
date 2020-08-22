@@ -1,20 +1,20 @@
-const fs = require('fs').promises;
+const fs = require('fs');
 const path = require('path');
 const chalk = require('chalk');
 const { program } = require('commander');
 const addIcon = require('./addIcon');
 
-const log = console.log;
-const blueLog = chalk.rgb(173, 235, 235);
-const pinkLog = chalk.rgb(235, 173, 235);
+const whiteLog = text => console.log(chalk.rgb(255, 255, 255)(text));
+const blueLog = text => console.log(chalk.rgb(173, 235, 235)(text));
+const pinkLog = text => console.log(chalk.rgb(235, 173, 235)(text));
 
-program.version('0.2.2');
+program.version('0.3.0');
 program
 	.option('-d, --dir','prints directories (cannot be used with -f)')
 	.option('-f, --file','prints files (cannot be used with -d)')
 	.parse(process.argv);
 
-if (program.file && program.dir) { log("Invalid argument combination\nTry ls -h for more help"); return }
+if (program.file && program.dir) { console.log("Invalid argument combination\nTry ls -h for more help"); return }
 
 // Finds where to add spaces to make sure file/folder names aren't cut off
 let terminalWidth = process.stdout.columns;
@@ -41,33 +41,26 @@ const parseWidth = files => {
 	return output;
 }
 
-
+const fileOrDir = (files, func) => files.reduce((acc,nxt,idx) => nxt[func]() ? [...acc, files[idx].name] : acc, []);
 
 (async () => {
 	try {
 		const dir = process.cwd();
-		log(chalk.whiteBright(`\nCONTENTS OF ${dir}:\n`));
+		whiteLog(`\nCONTENTS OF ${dir}:\n`);
 		// Get list of filenames and request file stats for each file
-		const filenames = await fs.readdir(dir,{ withFileTypes: true });
+		const filenames = await fs.promises.readdir(dir,{ withFileTypes: true });
 		// const fileStats = filenames.map(filename => fs.lstat(path.join(dir,filename)));
 		// const stats = await Promise.all(fileStats);
-		// Filters by folders
-		let folders;
-		if (!program.file) {
-			folders = filenames.reduce((acc,nxt,idx) => nxt.isDirectory() ? [...acc, `[\uF115 ${filenames[idx].name}]`] : acc, []);
-			if (folders.length) {
-				log(blueLog(parseWidth(folders)));
-			}
+		filenames.forEach(file => file.name = addIcon(file));
+		let folders = fileOrDir(filenames, 'isDirectory');
+		let files = fileOrDir(filenames,'isFile');
+		if (!program.file) {  
+			blueLog(parseWidth(folders)); 
 		}
-		// Filters by files
-		if (!program.dir) {
-			let files = filenames.reduce((acc,nxt,idx) => nxt.isFile() ? [...acc, addIcon(filenames[idx].name)] : acc, []);
-			if (files.length) {
-				if (folders.length) { log('') }
-				log(pinkLog(parseWidth(files)));
-			}
+		if (!program.dir) { 
+			pinkLog(parseWidth(files)); 
 		}
 	} catch (err) {
-		log(err);
+		console.log(err);
 	} 
 })();

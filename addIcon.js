@@ -23,8 +23,9 @@ let icons = {
 }
 
 const addIcon = file => {
-	const i = icon => `[${icon} ${file}]`;
-	const { ext } = path.parse(file);
+	const i = icon => `[${icon} ${file.name}]`;
+	if (file.isDirectory()) return i(icons.folder)
+	const { ext } = path.parse(file.name);
 	switch (ext) {
 		case '.cpp':
 		case '.c':
@@ -91,6 +92,8 @@ const addIcon = file => {
 		case '.rar':
 		case '.zip':
 			return i(icons.zip);
+		case '.folder':
+			return i(icons.folder);
 		default:
 			return i(icons.file);
 	}
