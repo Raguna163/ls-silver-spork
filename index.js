@@ -2,14 +2,14 @@ const fs = require('fs');
 const path = require('path');
 const chalk = require('chalk');
 const { program } = require('commander');
-const addIcon = require('./addIcon');
+const formatFile = require('./formatFile');
 
 const whiteLog = text => console.log(chalk.rgb(255, 255, 255)(text));
 const blueLog = text => console.log(chalk.rgb(173, 235, 235)(text));
 const pinkLog = text => console.log(chalk.rgb(235, 173, 235)(text));
 const redLog = text => console.log(chalk.rgb(242, 56, 56)(text));
 
-program.version('0.3.0');
+program.version('0.4.0');
 program
 	.option('-d, --dir','prints directories (cannot be used with -f)')
 	.option('-f, --file','prints files (cannot be used with -d)')
@@ -56,7 +56,7 @@ const readDirectory = async () => {
 			const stats = await Promise.all(fileStats);
 			filenames.forEach((file,idx) => file.size = stats[idx].size);
 		}
-		filenames.forEach(file => file.name = addIcon(file));
+		filenames.forEach(file => file.name = formatFile(file));
 		let folders = fileOrDir(filenames, 'isDirectory');
 		let files = fileOrDir(filenames, 'isFile');
 		return { folders, files };

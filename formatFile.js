@@ -26,7 +26,7 @@ let icons = {
 	zip: "\uF1C6"
 }
 
-const addIcon = file => {
+const formatFile = file => {
 	const i = icon => `[${file.size ? file.size + " Bytes " : ""}${icon} ${file.name}]`;
 	if (file.isDirectory()) {
 		switch (file.name) {
@@ -114,4 +114,4 @@ const addIcon = file => {
 	}
 }
 
-module.exports = addIcon;
+module.exports = formatFile;
