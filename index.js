@@ -3,7 +3,6 @@ const path = require('path');
 const chalk = require('chalk');
 const { program } = require('commander');
 const formatFile = require('./formatFile');
-const { fips } = require('crypto');
 
 const whiteLog = text => console.log(chalk.rgb(255, 255, 255)(text));
 const blueLog = text => console.log(chalk.rgb(173, 235, 235)(text));
