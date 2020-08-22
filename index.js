@@ -3,6 +3,7 @@ const path = require('path');
 const chalk = require('chalk');
 const { program } = require('commander');
 const formatFile = require('./formatFile');
+const { fips } = require('crypto');
 
 const whiteLog = text => console.log(chalk.rgb(255, 255, 255)(text));
 const blueLog = text => console.log(chalk.rgb(173, 235, 235)(text));
@@ -44,6 +45,8 @@ const inlinePrint = files => {
 	return output;
 }
 
+const maxLength = arr => arr.reduce((acc,nxt) => nxt.length > acc ? nxt.length : acc, 0);
+
 const fileOrDir = (files, func) => files.reduce((acc,nxt,idx) => nxt[func]() ? [...acc, files[idx].name] : acc, []);
 
 const readDirectory = async () => {
@@ -74,18 +77,34 @@ const readDirectory = async () => {
 	else if (!files.length && program.file) { whiteLog('No Files, try removing flag'); }
 
 	if (program.columns) {
-		if (program.dir) {
+		if (program.dir || !files.length) {
 			whiteLog("Folders:");
 			folders.forEach(folder => blueLog(folder));
-		} else if (program.file) {
+		} else if (program.file || !folders.length) {
 			whiteLog("Files:");
 			files.forEach(file => pinkLog(file));
 		} else {
-			whiteLog("Folders:");
-			folders.forEach(folder => blueLog(folder));
-			console.log('');
-			whiteLog("Files:");
-			files.forEach(file => pinkLog(file));
+			const column1 = maxLength(folders) + 5;
+			const column2 = maxLength(files);
+			if (column1 + column2 > terminalWidth) {
+				whiteLog("Folders:");
+				folders.forEach(folder => blueLog(folder));
+				console.log('');
+				whiteLog("Files:");
+				files.forEach(file => pinkLog(file));
+			} else {
+				whiteLog(`Folders:${" ".repeat(column1 - 8)}Files:`)
+				for (let idx = 0; idx < maxLength([folders,files]); idx++) {
+					if (folders[idx]) {
+						blueLog(folders[idx] + "\033[s");
+					} else { console.log("\033[s") }
+					if (files[idx]) {
+						const spaces = " ".repeat(column1 - (folders[idx] ? folders[idx].length : 0));
+						process.stdout.write("\033[u\033[1A");
+						pinkLog(spaces + files[idx]);
+					}					
+				}
+			}
 		}
 	} else {
 		if (!program.file && folders.length) {
