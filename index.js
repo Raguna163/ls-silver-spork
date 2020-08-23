@@ -12,7 +12,7 @@ program
 	.option('-c, --columns','prints as one or two columns')
 	.parse(process.argv);
 
-if (program.file && program.dir || program.dir && program.columns || program.args.length > 1) { 
+if (program.file && program.dir || program.dir && program.size || program.args.length > 1) { 
 	errorLog(`\nInvalid argument combination: ${process.argv.slice(2)}\nTry "ls -h" for more help`); 
 	return;
 }
