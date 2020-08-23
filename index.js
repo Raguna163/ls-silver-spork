@@ -1,15 +1,10 @@
 const fs = require('fs');
 const path = require('path');
-const chalk = require('chalk');
 const { program } = require('commander');
 const formatFile = require('./formatFile');
+const { headerLog, folderLog, fileLog, errorLog } = require('./formatOutput');
 
-const whiteLog = text => console.log(chalk.rgb(255, 255, 255)(text));
-const blueLog = text => console.log(chalk.rgb(173, 235, 235)(text));
-const pinkLog = text => console.log(chalk.rgb(235, 173, 235)(text));
-const redLog = text => console.log(chalk.rgb(242, 56, 56)(text));
-
-program.name("ls").usage("[directory] [options]").version('0.7.0');
+program.name("ls").usage("[directory] [options]").version('0.7.1');
 program
 	.option('-d, --dir','prints directories (cannot be used with -f or -s)')
 	.option('-f, --file','prints files (cannot be used with -d)')
@@ -18,7 +13,7 @@ program
 	.parse(process.argv);
 
 if (program.file && program.dir || program.dir && program.columns || program.args.length > 1) { 
-	redLog(`\nInvalid argument combination: ${process.argv.slice(2)}\nTry "ls -h" for more help`); 
+	errorLog(`\nInvalid argument combination: ${process.argv.slice(2)}\nTry "ls -h" for more help`); 
 	return;
 }
 
@@ -54,7 +49,7 @@ const fileOrDir = (files, func) => files.reduce((acc,nxt,idx) => nxt[func]() ? [
 const readDirectory = async () => {
 	try {
 		const dir = path.join(process.cwd(),program.args.length ? program.args[0] : "");
-		whiteLog(`\nCONTENTS OF ${dir}:\n`);
+		headerLog(`\nCONTENTS OF ${dir}:\n`);
 		// Get list of filenames and request file stats for each file
 		const filenames = await fs.promises.readdir(dir, { withFileTypes: true });
 		if (program.size) {
@@ -67,56 +62,56 @@ const readDirectory = async () => {
 		let files = fileOrDir(filenames, 'isFile');
 		return { folders, files };
 	} catch (err) {
-		redLog(err);
+		errorLog(err);
 	}
 }
 
 (async () => {
 	const { folders, files } = await readDirectory();
 
-	if (!folders.length && !files.length) { whiteLog('Directory Empty'); return; }
-	else if (!folders.length && program.dir) { whiteLog('No Folders, try removing flag'); }
-	else if (!files.length && program.file) { whiteLog('No Files, try removing flag'); }
+	if (!folders.length && !files.length) { headerLog('Directory Empty'); return; }
+	else if (!folders.length && program.dir) { headerLog('No Folders, try removing flag'); }
+	else if (!files.length && program.file) { headerLog('No Files, try removing flag'); }
 
 	if (program.columns) {
 		if (program.dir || !files.length) {
-			whiteLog("Folders:");
-			folders.forEach(folder => blueLog(folder));
+			headerLog("Folders:");
+			folders.forEach(folder => folderLog(folder));
 		} else if (program.file || !folders.length) {
-			whiteLog("Files:");
-			files.forEach(file => pinkLog(file));
+			headerLog("Files:");
+			files.forEach(file => fileLog(file));
 		} else {
 			const column1 = maxLength(folders) + 5;
 			const column2 = maxLength(files);
 			if (column1 + column2 > terminalWidth) {
-				whiteLog("Folders:");
-				folders.forEach(folder => blueLog(folder));
+				headerLog("Folders:");
+				folders.forEach(folder => folderLog(folder));
 				console.log('');
-				whiteLog("Files:");
-				files.forEach(file => pinkLog(file));
+				headerLog("Files:");
+				files.forEach(file => fileLog(file));
 			} else {
-				whiteLog(`Folders:${" ".repeat(column1 - 8)}Files:`)
+				headerLog(`Folders:${" ".repeat(column1 - 8)}Files:`)
 				for (let idx = 0; idx < maxLength([folders,files]); idx++) {
 					if (folders[idx]) {
-						blueLog(folders[idx] + "\033[s");
+						folderLog(folders[idx] + "\033[s");
 					} else { console.log("\033[s") }
 					if (files[idx]) {
 						const spaces = " ".repeat(column1 - (folders[idx] ? folders[idx].length : 0));
 						process.stdout.write("\033[u\033[1A");
-						pinkLog(spaces + files[idx]);
+						fileLog(spaces + files[idx]);
 					}					
 				}
 			}
 		}
 	} else {
 		if (!program.file && folders.length) {
-			whiteLog("Folders:");
-			blueLog(inlinePrint(folders));
+			headerLog("Folders:");
+			folderLog(inlinePrint(folders));
 		}
 		if (!program.dir && files.length) {
 			if (folders.length && !program.file && !program.columns) { console.log('') }
-			whiteLog("Files:");
-			pinkLog(inlinePrint(files));
+			headerLog("Files:");
+			fileLog(inlinePrint(files));
 		}
 	}
 })();
