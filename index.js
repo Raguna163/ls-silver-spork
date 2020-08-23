@@ -2,9 +2,9 @@ const fs = require('fs');
 const path = require('path');
 const { program } = require('commander');
 const formatFile = require('./formatFile');
-const { headerLog, folderLog, fileLog, errorLog } = require('./formatOutput');
+const { headerLog, folderLog, fileLog, errorLog, newLine } = require('./formatOutput');
 
-program.name("ls").usage("[directory] [options]").version('0.7.1');
+program.name("ls").usage("[directory] [options]").version('0.7.2');
 program
 	.option('-d, --dir','prints directories (cannot be used with -f or -s)')
 	.option('-f, --file','prints files (cannot be used with -d)')
@@ -40,6 +40,30 @@ const inlinePrint = files => {
 		count++;
 	} while (count <= lines);
 	return output;
+}
+
+const columnPrint = (folders,files) => {
+	const column1 = maxLength(folders) + 5;
+	const column2 = maxLength(files);
+	if (column1 + column2 > terminalWidth) {
+		headerLog("Folders:");
+		folders.forEach(folder => folderLog(folder));
+		newLine();
+		headerLog("Files:");
+		files.forEach(file => fileLog(file));
+	} else {
+		headerLog(`Folders:${" ".repeat(column1 - 8)}Files:`)
+		for (let idx = 0; idx < maxLength([folders, files]); idx++) {
+			if (folders[idx]) {
+				folderLog(folders[idx] + "\033[s");
+			} else { console.log("\033[s") }
+			if (files[idx]) {
+				const spaces = " ".repeat(column1 - (folders[idx] ? folders[idx].length : 0));
+				process.stdout.write("\033[u\033[1A");
+				fileLog(spaces + files[idx]);
+			}
+		}
+	}
 }
 
 const maxLength = arr => arr.reduce((acc,nxt) => nxt.length > acc ? nxt.length : acc, 0);
@@ -81,27 +105,7 @@ const readDirectory = async () => {
 			headerLog("Files:");
 			files.forEach(file => fileLog(file));
 		} else {
-			const column1 = maxLength(folders) + 5;
-			const column2 = maxLength(files);
-			if (column1 + column2 > terminalWidth) {
-				headerLog("Folders:");
-				folders.forEach(folder => folderLog(folder));
-				console.log('');
-				headerLog("Files:");
-				files.forEach(file => fileLog(file));
-			} else {
-				headerLog(`Folders:${" ".repeat(column1 - 8)}Files:`)
-				for (let idx = 0; idx < maxLength([folders,files]); idx++) {
-					if (folders[idx]) {
-						folderLog(folders[idx] + "\033[s");
-					} else { console.log("\033[s") }
-					if (files[idx]) {
-						const spaces = " ".repeat(column1 - (folders[idx] ? folders[idx].length : 0));
-						process.stdout.write("\033[u\033[1A");
-						fileLog(spaces + files[idx]);
-					}					
-				}
-			}
+			columnPrint(folders,files);
 		}
 	} else {
 		if (!program.file && folders.length) {
@@ -109,7 +113,7 @@ const readDirectory = async () => {
 			folderLog(inlinePrint(folders));
 		}
 		if (!program.dir && files.length) {
-			if (folders.length && !program.file && !program.columns) { console.log('') }
+			if (folders.length && !program.file && !program.columns) { newLine }
 			headerLog("Files:");
 			fileLog(inlinePrint(files));
 		}
