@@ -1,5 +1,5 @@
 const fs = require('fs');
-const path = require('path');
+const { join } = require('path');
 const { program } = require('commander');
 const formatFile = require('./formatFile');
 const { headerLog, folderLog, fileLog, errorLog, newLine } = require('./formatOutput');
@@ -10,6 +10,7 @@ program
 	.option('-f, --file','prints files (cannot be used with -d)')
 	.option('-s, --size','prints file sizes (cannot be used with -d)')
 	.option('-c, --columns','prints as one or two columns')
+	.option('-C, --config', 'configure colours')
 	.parse(process.argv);
 
 if (program.file && program.dir || program.dir && program.size || program.args.length > 1) { 
@@ -45,6 +46,7 @@ const inlinePrint = files => {
 const columnPrint = (folders,files) => {
 	const column1 = maxLength(folders) + 5;
 	const column2 = maxLength(files);
+	let output = "";
 	if (column1 + column2 > terminalWidth) {
 		headerLog("Folders:");
 		folders.forEach(folder => folderLog(folder));
@@ -72,12 +74,12 @@ const fileOrDir = (files, func) => files.reduce((acc,nxt,idx) => nxt[func]() ? [
 
 const readDirectory = async () => {
 	try {
-		const dir = path.join(process.cwd(),program.args.length ? program.args[0] : "");
+		const dir = join(process.cwd(),program.args.length ? program.args[0] : "");
 		headerLog(`\nCONTENTS OF ${dir}:\n`);
 		// Get list of filenames and request file stats for each file
 		const filenames = await fs.promises.readdir(dir, { withFileTypes: true });
 		if (program.size) {
-			const fileStats = filenames.map(filename => fs.promises.lstat(path.join(dir, filename.name)));
+			const fileStats = filenames.map(filename => fs.promises.lstat(join(dir, filename.name)));
 			const stats = await Promise.all(fileStats);
 			filenames.forEach((file,idx) => file.size = stats[idx].size);
 		}
@@ -90,7 +92,7 @@ const readDirectory = async () => {
 	}
 }
 
-(async () => {
+const LS = async () => {
 	const { folders, files } = await readDirectory();
 
 	if (!folders.length && !files.length) { headerLog('Directory Empty'); return; }
@@ -113,9 +115,22 @@ const readDirectory = async () => {
 			folderLog(inlinePrint(folders));
 		}
 		if (!program.dir && files.length) {
-			if (folders.length && !program.file && !program.columns) { newLine }
+			if (folders.length && !program.file && !program.columns) { newLine() }
 			headerLog("Files:");
 			fileLog(inlinePrint(files));
 		}
 	}
-})();
+}
+
+const Config = () => {
+	const config = JSON.parse(fs.readFileSync(join(__dirname, 'config.json')));
+	for (const setting in config) {
+		console.log(setting);
+	}
+}
+
+if (program.config) {
+	Config();
+} else {
+	LS();
+}
