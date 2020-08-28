@@ -2,9 +2,10 @@ const fs = require('fs');
 const { join, parse } = require('path');
 const { program } = require('commander');
 const formatFile = require('./formatFile');
-const { headerLog, folderLog, fileLog, errorLog, newLine } = require('./formatOutput');
+const { log, inlinePrint, columnPrint } = require('./formatOutput');
+const { headerLog, errorLog, newLine } = log;
 
-program.name("ls").usage("[directory] [options]").version('0.7.2');
+program.name("ls").usage("[directory] [options]").version('0.8.0');
 program
 	.option('-d, --dir','prints directories (cannot be used with -f or -s)')
 	.option('-f, --file','prints files (cannot be used with -d)')
@@ -19,63 +20,10 @@ if (program.file && program.dir || program.dir && program.size || program.args.l
 	return;
 }
 
-// Finds where to add spaces to make sure file/folder names aren't cut off
-let terminalWidth = process.stdout.columns;
-const inlinePrint = files => {
-	let output = files.join(' ');
-	let count = 1;
-	let lines;
-	do {
-		lines = Math.floor(output.length / terminalWidth);
-		let spaces = 0;
-		let cursor;
-		//trace back to first bracket
-		do {
-			spaces++;
-			//place 'cursor' at end
-			cursor = terminalWidth * count - spaces;
-		} while (output[cursor] !== "[" && output[cursor] !== "]" && spaces < terminalWidth - 1);
-		//insert number of spaces traversed if bracket was broken
-		if (output[cursor] === "[") {
-			output = output.substring(0, cursor) + " ".repeat(spaces) + output.substring(cursor, output.length);
-		}
-		count++;
-	} while (count <= lines);
-	return output;
-}
-
-const columnPrint = (folders,files) => {
-	const column1 = maxLength(folders) + 5;
-	const column2 = maxLength(files);
-	if (column1 + column2 > terminalWidth) {
-		headerLog("Folders:");
-		folders.forEach(folder => folderLog(folder));
-		newLine();
-		headerLog("Files:");
-		files.forEach(file => fileLog(file));
-	} else {
-		headerLog(`Folders:${" ".repeat(column1 - 8)}Files:`)
-		for (let idx = 0; idx < maxLength([folders, files]); idx++) {
-			if (folders[idx]) {
-				folderLog(folders[idx] + "\033[s");
-			} else { console.log("\033[s") }
-			if (files[idx]) {
-				const spaces = " ".repeat(column1 - (folders[idx] ? folders[idx].length : 0));
-				process.stdout.write("\033[u\033[1A");
-				fileLog(spaces + files[idx]);
-			}
-		}
-	}
-}
-
-const maxLength = arr => arr.reduce((acc,nxt) => nxt.length > acc ? nxt.length : acc, 0);
-
 const fileOrDir = (files, func) => files.reduce((acc,nxt,idx) => nxt[func]() ? [...acc, files[idx].name] : acc, []);
 
-const readDirectory = async () => {
+const readDirectory = async (dir) => {
 	try {
-		const dir = join(process.cwd(),program.args.length ? program.args[0] : "");
-		headerLog(`\nCONTENTS OF ${dir}:\n`);
 		// Get list of filenames and request file stats for each file
 		let filenames = await fs.promises.readdir(dir, { withFileTypes: true });
 		if (program.ext) {
@@ -101,31 +49,29 @@ const readDirectory = async () => {
 
 const LS = async () => {
 	try {
-		const { folders, files } = await readDirectory();
+		const dir = join(process.cwd(), program.args.length ? program.args[0] : "");
+		const { folders, files } = await readDirectory(dir);
 
-		if (!folders.length && !files.length) { headerLog('Directory Empty'); return; }
-		else if (!folders.length && program.dir) { headerLog('No Folders, try removing flag'); }
-		else if (!files.length && program.file) { headerLog('No Files, try removing flag'); }
+		if (!folders.length && !files.length) { headerLog('\nDirectory Empty'); return; }
+		else if (!folders.length && program.dir) { headerLog(`\nNo Folders in ${dir}\nTry removing flag`); return; }
+		else if (!files.length && program.file) { headerLog(`\nNo Files in ${dir}\nTry removing flag`); return; }
 
+		headerLog(`\nCONTENTS OF ${dir}:\n`);
 		if (program.columns) {
 			if (program.dir || !files.length) {
-				headerLog("Folders:");
-				folders.forEach(folder => folderLog(folder));
+				columnPrint(folders, null);
 			} else if (program.file || !folders.length) {
-				headerLog("Files:");
-				files.forEach(file => fileLog(file));
+				columnPrint(null, files);
 			} else {
 				columnPrint(folders, files);
 			}
 		} else {
 			if (!program.file && folders.length) {
-				headerLog("Folders:");
-				folderLog(inlinePrint(folders));
+				inlinePrint(folders,"Folders:");
 			}
 			if (!program.dir && files.length) {
 				if (folders.length && !program.file && !program.columns) { newLine() }
-				headerLog("Files:");
-				fileLog(inlinePrint(files));
+				inlinePrint(files,"Files:");
 			}
 		}
 	} catch (err) {
