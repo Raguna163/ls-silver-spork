@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { join } = require('path');
+const { join, parse } = require('path');
 const { program } = require('commander');
 const formatFile = require('./formatFile');
 const { headerLog, folderLog, fileLog, errorLog, newLine } = require('./formatOutput');
@@ -8,6 +8,7 @@ program.name("ls").usage("[directory] [options]").version('0.7.2');
 program
 	.option('-d, --dir','prints directories (cannot be used with -f or -s)')
 	.option('-f, --file','prints files (cannot be used with -d)')
+	.option('-e, --ext <extension>', 'only returns files with specified extension')
 	.option('-s, --size','prints file sizes (cannot be used with -d)')
 	.option('-c, --columns','prints as one or two columns')
 	.option('-C, --config', 'configure colours')
@@ -46,7 +47,6 @@ const inlinePrint = files => {
 const columnPrint = (folders,files) => {
 	const column1 = maxLength(folders) + 5;
 	const column2 = maxLength(files);
-	let output = "";
 	if (column1 + column2 > terminalWidth) {
 		headerLog("Folders:");
 		folders.forEach(folder => folderLog(folder));
@@ -77,7 +77,14 @@ const readDirectory = async () => {
 		const dir = join(process.cwd(),program.args.length ? program.args[0] : "");
 		headerLog(`\nCONTENTS OF ${dir}:\n`);
 		// Get list of filenames and request file stats for each file
-		const filenames = await fs.promises.readdir(dir, { withFileTypes: true });
+		let filenames = await fs.promises.readdir(dir, { withFileTypes: true });
+		if (program.ext) {
+			// Adds dot to extension to make it optional
+			if (!program.ext.startsWith('.')) {
+				program.ext = `.${program.ext}`
+			}
+			filenames = filenames.reduce((acc, nxt) => parse(nxt.name).ext === program.ext ? [...acc, nxt] : acc, []);
+		}
 		if (program.size) {
 			const fileStats = filenames.map(filename => fs.promises.lstat(join(dir, filename.name)));
 			const stats = await Promise.all(fileStats);
@@ -93,32 +100,36 @@ const readDirectory = async () => {
 }
 
 const LS = async () => {
-	const { folders, files } = await readDirectory();
+	try {
+		const { folders, files } = await readDirectory();
 
-	if (!folders.length && !files.length) { headerLog('Directory Empty'); return; }
-	else if (!folders.length && program.dir) { headerLog('No Folders, try removing flag'); }
-	else if (!files.length && program.file) { headerLog('No Files, try removing flag'); }
+		if (!folders.length && !files.length) { headerLog('Directory Empty'); return; }
+		else if (!folders.length && program.dir) { headerLog('No Folders, try removing flag'); }
+		else if (!files.length && program.file) { headerLog('No Files, try removing flag'); }
 
-	if (program.columns) {
-		if (program.dir || !files.length) {
-			headerLog("Folders:");
-			folders.forEach(folder => folderLog(folder));
-		} else if (program.file || !folders.length) {
-			headerLog("Files:");
-			files.forEach(file => fileLog(file));
+		if (program.columns) {
+			if (program.dir || !files.length) {
+				headerLog("Folders:");
+				folders.forEach(folder => folderLog(folder));
+			} else if (program.file || !folders.length) {
+				headerLog("Files:");
+				files.forEach(file => fileLog(file));
+			} else {
+				columnPrint(folders, files);
+			}
 		} else {
-			columnPrint(folders,files);
+			if (!program.file && folders.length) {
+				headerLog("Folders:");
+				folderLog(inlinePrint(folders));
+			}
+			if (!program.dir && files.length) {
+				if (folders.length && !program.file && !program.columns) { newLine() }
+				headerLog("Files:");
+				fileLog(inlinePrint(files));
+			}
 		}
-	} else {
-		if (!program.file && folders.length) {
-			headerLog("Folders:");
-			folderLog(inlinePrint(folders));
-		}
-		if (!program.dir && files.length) {
-			if (folders.length && !program.file && !program.columns) { newLine() }
-			headerLog("Files:");
-			fileLog(inlinePrint(files));
-		}
+	} catch (err) {
+		errorLog(err);
 	}
 }
 
