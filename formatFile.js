@@ -1,4 +1,4 @@
-const path = require('path');	
+const { parse } = require('path');	
 
 // Source: https://www.nerdfonts.com/cheat-sheet
 let icons = {
@@ -26,16 +26,23 @@ let icons = {
 	zip: "\uF1C6"
 }
 
+// Makes file sizes human readable
+const GB = 1073741824;
+const MB = 1048576;
+const KB = 1024;
 const formatSize = size => {
-	if (size > 1073741824) { return ` - ${(size / 1073741824).toFixed(2)} GB` }
-	if (size > 1048576) { return ` - ${(size / 1048576).toFixed(2)} MB` }
-	else if (size > 1024) { return ` - ${(size / 1024).toFixed(2)} KB` }
-	else if (size > 0) { return ` - ${size} B` }
-	else { return '' }
+	if (size > GB) return ` - ${(size / GB).toFixed(2)} GB`
+	if (size > MB) return ` - ${(size / MB).toFixed(2)} MB`
+	if (size > KB) return ` - ${(size / KB).toFixed(2)} KB`
+	if (size > 0) return ` - ${size} B`
+	return ''
 }
 
 const formatFile = file => {
+	// Icon wrapper function
 	const i = icon => `[${icon} ${file.name}${formatSize(file.size)}]`;
+
+	// Adding icons to special directories
 	if (file.isDirectory()) {
 		switch (file.name) {
 			case 'Google Drive':
@@ -48,8 +55,11 @@ const formatFile = file => {
 				return i(icons.folder);
 		}
 	}
-	const { ext } = path.parse(file.name);
+
+	// Adding icons to files
+	const { ext } = parse(file.name);
 	switch (ext) {
+		// Unique files
 		case '.cpp':
 		case '.c':
 		case '.cs':
@@ -60,25 +70,35 @@ const formatFile = file => {
 		case '.ts':
 		case '.py':
 			return i(icons[ext.substring(1)]); 
+
+		// Audio files
 		case '.flac':
 		case '.mp3':
 		case '.wav':
 		case '.wma':
 			return i(icons.audio);
+
+		// Binary files
 		case '.bak':
 		case '.bin':
 		case '.exe':
 		case '.iso':
 		case '.msi':
 			return i(icons.bin);
+		
+		// Code files
 		case '.bat':
 		case '.h':
 		case '.html':
 		case '.xml':
 			return i(icons.code);
+
+		// Font files
 		case '.otf':
 		case '.ttf':
 			return i(icons.font);
+
+		// Image files
 		case '.gif':
 		case '.ico':
 		case '.jpg':
@@ -88,6 +108,8 @@ const formatFile = file => {
 		case '.svg':
 		case '.tif':
 			return i(icons.img);
+
+		// Text files
 		case '.csv':
 		case '.db':
 		case '.dll':
@@ -101,6 +123,8 @@ const formatFile = file => {
 		case '.sav':
 		case '.txt':
 			return i(icons.log);
+
+		// Video files
 		case '.3gp':
 		case '.avi':
 		case '.flv':
@@ -111,12 +135,14 @@ const formatFile = file => {
 		case '.mpeg':
 		case '.wmv':
 			return i(icons.vid);
+
+		// Compressed archives
 		case '.7z':
 		case '.rar':
 		case '.zip':
 			return i(icons.zip);
-		case '.folder':
-			return i(icons.folder);
+		
+		// Generic files
 		default:
 			return i(icons.file);
 	}
