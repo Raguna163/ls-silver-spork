@@ -9,10 +9,11 @@ const { Log, inlinePrint, columnPrint } = require('./formatOutput');
 
 
 // Configure Commander module
-program.name("ls").usage("[-o, --options] [directory]").version('0.9.0');
+program.name("ls").usage("[-o, --options] [directory]").version('0.9.1');
 program
-.option('-d, --dir','prints directories (cannot be used with -f or -s)')
+	.option('-d, --dir','prints directories (cannot be used with -f or -s)')
 	.option('-f, --file','prints files (cannot be used with -d)')
+	.option('-h, --hidden', 'shows hidden files & directories')
 	.option('-e, --ext <extension>', 'only returns files with specified extension')
 	.option('-s, --size','prints file sizes (cannot be used with -d)')
 	.option('-c, --columns','prints as one or two columns')
@@ -46,13 +47,18 @@ async function readDirectory(dir) {
 	try {
 		let filenames = await fs.promises.readdir(dir, { withFileTypes: true });
 
+		// Filters out hidden files unless flag is given
+		if (!program.hidden) {
+			filenames = filenames.filter(file => !file.name.startsWith('.'));
+		}
+
 		// Filter by extension if flag given
 		if (program.ext) {
 			// Optionally adds dot to extension search
 			program.ext = program.ext.startsWith('.') ? program.ext : `.${program.ext}`;
-			filenames = filenames.reduce((acc, nxt) => parse(nxt.name).ext === program.ext ? [...acc, nxt] : acc, []);
+			filenames = filenames.filter(file => parse(file.name).ext === program.ext);
 		}
-		
+
 		// Adds size property to each filename
 		if (program.size) {
 			const fileStats = filenames.map(filename => fs.promises.lstat(join(dir, filename.name)));
