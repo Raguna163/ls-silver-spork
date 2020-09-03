@@ -9,7 +9,7 @@ const { Log, inlinePrint, columnPrint } = require('./formatOutput');
 
 
 // Configure Commander module
-program.name("ls").usage("[-o, --options] [directory]").version('0.9.1');
+program.name("ls").usage("[-o, --options] [directory]").version('0.9.2');
 program
 	.option('-d, --dir','prints directories (cannot be used with -f or -s)')
 	.option('-f, --file','prints files (cannot be used with -d)')
@@ -70,7 +70,8 @@ async function readDirectory(dir) {
 		folders = !program.file ? fileOrDir(filenames, 'isDirectory') : [];
 		files = !program.dir ? fileOrDir(filenames, 'isFile') : [];
 	} catch (err) {
-		Log.errorLog(err);
+		if (err.code === "EPERM") Log.errorLog("\nPermission denied");
+		else Log.errorLog(err);
 	}
 	return { folders, files };
 }
@@ -85,7 +86,9 @@ async function LS() {
 		else if (!folders.length && program.dir) { Log.headerLog(`\nThere are no folders in ${dir}\nTry removing -d flag`); return; }
 		else if (!files.length && program.file) { Log.headerLog(`\nThe are no files in ${dir}\nTry removing -f flag`); return; }
 
-		Log.headerLog(`\nCONTENTS OF ${dir}:\n`);
+		Log.headerLog(`\n${dir}:`);
+		if (program.size) Log.headerLog(`Folders: ${folders.length} | Files: ${files.length}\n`);
+		
 		if (program.columns) {
 			if (program.dir || !files.length) {
 				columnPrint(folders, null);
@@ -104,6 +107,7 @@ async function LS() {
 			}
 		}
 	} catch (err) {
-		Log.errorLog(err);
+		if (err.name === "TypeError") Log.errorLog("Could not get information");
+		else Log.errorLog(err); 
 	}
 }
