@@ -9,6 +9,10 @@ This is mainly a learning experience for me, but maybe someone else will find va
 ## Quick-Start
 *Note: Only tested in Command Prompt, not PowerShell or MAC/Linux shells; since they have their own 'ls' implementations*
 
+**Nerd Fonts Required**
+
+[Download Nerd Fonts](https://www.nerdfonts.com/)
+
 **NODE**
 
 `npm install -g ls-silver-spork`
@@ -43,6 +47,7 @@ Goals for initial "release" - V 1.0.0
 - Add configuration functionality
 	- Change colors
 	- Default options
+- Make nerd fonts an optional dependency
 
 #### Known Bugs
 The default formatting has some spacing issues where a space will appear at the beginning of the line, and sometimes the program won't catch a formatting error on the last line. A complete rework is preferable to a band-aid fix.
