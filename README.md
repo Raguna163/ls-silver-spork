@@ -8,9 +8,13 @@ This is mainly a learning experience for me, but maybe someone else will find va
 
 ## Quick-Start
 *Note: Only tested in Command Prompt, not PowerShell or MAC/Linux shells; since they have their own 'ls' implementations*
+
 **NODE**
+
 `npm install -g ls-silver-spork`
+
 **COLOURS**
+
 Edit `config/config.json` if you're not a fan of cotton candy
 
 ## Usage
