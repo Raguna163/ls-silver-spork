@@ -3,18 +3,18 @@ const fs = require('fs');
 const { join, parse } = require('path');
 const { program } = require('commander');
 // Dev Modules
-const Configure = require('./configure');
-const formatFile = require('./formatFile');
-const { Log, inlinePrint, columnPrint } = require('./formatOutput');
+const Configure = require('./config/configure');
+const formatFile = require('./format/formatFile');
+const { Log, inlinePrint, columnPrint } = require('./format/formatOutput');
 
 
 // Configure Commander module
-program.name("ls").usage("[-o, --options] [directory]").version('0.9.2');
+program.name("ls").usage("[-o, --options] [directory]").version('0.10.0');
 program
 	.option('-d, --dir','prints directories (cannot be used with -f or -s)')
 	.option('-f, --file','prints files (cannot be used with -d)')
-	.option('-h, --hidden', 'shows hidden files & directories')
-	.option('-e, --ext <extension>', 'only returns files with specified extension')
+	.option('-a, --all', 'shows hidden files & directories')
+	.option('-e, --ext <extension>', 'only returns specified extension')
 	.option('-s, --size','prints file sizes (cannot be used with -d)')
 	.option('-c, --columns','prints as one or two columns')
 	.option('-C, --config', 'configure colours')
@@ -23,7 +23,7 @@ program
 /* Check for arguments that contradict each other
 ** 1. Omitting both files and directories
 ** 2. Directories have no size 
-** 3. Only one directory argument
+** 3. More than one directory argument
 */
 if (program.file && program.dir || program.dir && program.size || program.args.length > 1) { 
 	Log.errorLog(`\nThis combination makes no sense: ${process.argv.slice(2)}\nTry "ls -h" for help`); 
@@ -48,7 +48,7 @@ async function readDirectory(dir) {
 		let filenames = await fs.promises.readdir(dir, { withFileTypes: true });
 
 		// Filters out hidden files unless flag is given
-		if (!program.hidden) {
+		if (!program.all) {
 			filenames = filenames.filter(file => !file.name.startsWith('.'));
 		}
 

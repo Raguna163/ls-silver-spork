@@ -1,3 +1,4 @@
+// Node Modules
 const { parse } = require('path');	
 
 // Source: https://www.nerdfonts.com/cheat-sheet
@@ -38,6 +39,7 @@ const formatSize = size => {
 	return ''
 }
 
+// Adds text decorations 
 const formatFile = file => {
 	// Icon wrapper function
 	const i = icon => `[${icon} ${file.name}${formatSize(file.size)}]`;

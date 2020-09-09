@@ -4,7 +4,7 @@ const chalk = require('chalk');
 const { join } = require('path');
 
 // Load console colours from config file
-const colours = JSON.parse(fs.readFileSync(join(__dirname, 'config.json')));
+const colours = JSON.parse(fs.readFileSync(join(__dirname, '../config/config.json')));
 const { headerColour, folderColour, fileColour, errorColour } = colours;
 
 // Wrapper functions for Chalk module
