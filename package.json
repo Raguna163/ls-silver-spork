@@ -1,9 +1,9 @@
 {
   "name": "ls-silver-spork",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "description": "Simple implementation of Ubuntu's LS command for Windows command prompt",
   "main": "index.js",
-  "keywords": ["ls", "cli", "directory"],
+  "keywords": [ "ls", "cli", "directory" ],
   "author": "Tristan Collicott",
   "repository": "https://github.com/Raguna163/ls-silver-spork.git",
   "license": "MIT",
@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "chalk": "^4.1.0",
+    "cli-format": "^3.0.9",
     "commander": "^6.0.0"
   }
 }

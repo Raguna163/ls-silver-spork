@@ -107,7 +107,7 @@ async function LS() {
 			}
 		}
 	} catch (err) {
-		if (err.name === "TypeError") Log.errorLog("Could not get information");
+		if (err.name === "TypeError") Log.errorLog("Error: " + err.message);
 		else Log.errorLog(err); 
 	}
 }

@@ -2,6 +2,7 @@
 const fs = require('fs');
 const chalk = require('chalk');
 const { join } = require('path');
+const cliFormat = require('cli-format');
 
 // Load console colours from config file
 const colours = JSON.parse(fs.readFileSync(join(__dirname, '../config/config.json')));
@@ -15,38 +16,12 @@ const errorLog = text => console.log(chalk.rgb(...errorColour)(text));
 const newLine = () => console.log();
 exports.Log = { headerLog, folderLog, fileLog, errorLog, newLine }
 
-// Finds where to add spaces to make sure file/folder names aren't cut off
-let terminalWidth = process.stdout.columns;
-exports.inlinePrint = (files, header) => {
-    let output = files.join(' ');
-    let count = 1;
-    let lines;
-    // Do...While count <= lines
-    do {
-        // Update line count
-        lines = Math.floor(output.length / terminalWidth);
-        let spaces = 0;
-        let cursor;
-        //trace back to first bracket
-        do {
-            spaces++;
-            //place 'cursor' at end
-            cursor = terminalWidth * count - spaces;
-        } while (output[cursor] !== "[" && output[cursor] !== "]" && spaces < terminalWidth - 1);
-        //insert number of spaces traversed if bracket was broken
-        if (output[cursor] === "[") {
-            output = output.substring(0, cursor) + " ".repeat(spaces) + output.substring(cursor, output.length);
-        }
-        count++;
-    } while (count <= lines);
-    headerLog(header);
-    header === "Files:" ? fileLog(output) : folderLog(output);
+// Use cliFormat to split overflowing lines and print as loop
+exports.inlinePrint = (items, header) => {
+    let output = cliFormat.lines(items.join(' '), { ansi: false, justify: true });
+    printAll(output, header, header === "Files:" ? fileLog : folderLog);
 }
 
-/* Helper function for column print:
-** - checks if there are more folders or files
-** - checks longest folder/file name
-*/
 const maxLength = arr => arr.reduce((acc, nxt) => nxt.length > acc ? nxt.length : acc, 0);
 
 const printAll = (content, title, log) => {
@@ -68,7 +43,7 @@ exports.columnPrint = (folders, files) => {
     const column2 = maxLength(files);
     
     // If the two columns exceeds terminal width, print one after the other
-    if (column1 + column2 > terminalWidth) {
+    if (column1 + column2 > process.stdout.columns) {
         printAll(folders, "Folders:", folderLog);
         newLine();
         printAll(files, "Files:", fileLog);

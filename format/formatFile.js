@@ -42,7 +42,7 @@ const formatSize = size => {
 // Adds text decorations 
 const formatFile = file => {
 	// Icon wrapper function
-	const i = icon => `[${icon} ${file.name}${formatSize(file.size)}]`;
+	const i = icon => `[${icon} ${file.name}${formatSize(file.size)}]`.replaceAll(' ', "ㅤ");
 
 	// Adding icons to special directories
 	if (file.isDirectory()) {
