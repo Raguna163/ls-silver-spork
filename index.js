@@ -9,7 +9,7 @@ const { Log, inlinePrint, columnPrint } = require('./format/formatOutput');
 
 
 // Configure Commander module
-program.name("ls").usage("[-o, --options] [directory]").version('0.10.0');
+program.name("ls").usage("[-o, --options] [directory]").version('0.12.0');
 program
 	.option('-d, --dir','prints directories (cannot be used with -f or -s)')
 	.option('-f, --file','prints files (cannot be used with -d)')
@@ -34,7 +34,7 @@ if (program.file && program.dir || program.dir && program.size || program.args.l
 if (program.config) {
 	Configure();
 } else {
-	LS();
+	RunLS();
 }
 
 // Helper function for readDirectory to filter file types
@@ -77,7 +77,7 @@ async function readDirectory(dir) {
 }
 
 // Main functionality
-async function LS() {
+async function RunLS() {
 	try {
 		const dir = join(process.cwd(), program.args.length ? program.args[0] : "");
 		const { folders, files } = await readDirectory(dir);

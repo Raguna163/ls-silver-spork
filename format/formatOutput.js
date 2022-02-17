@@ -9,16 +9,18 @@ const colours = JSON.parse(fs.readFileSync(join(__dirname, '../config/config.jso
 const { headerColour, folderColour, fileColour, errorColour } = colours;
 
 // Wrapper functions for Chalk module
-const headerLog = text => console.log(chalk.rgb(...headerColour)(text));
-const folderLog = text => console.log(chalk.rgb(...folderColour)(text));
-const fileLog = text => console.log(chalk.rgb(...fileColour)(text));
-const errorLog = text => console.log(chalk.rgb(...errorColour)(text));
-const newLine = () => console.log();
+const { log } = console;
+const headerLog = text => log(chalk.rgb(...headerColour)(text));
+const folderLog = text => log(chalk.rgb(...folderColour)(text));
+const fileLog = text => log(chalk.rgb(...fileColour)(text));
+const errorLog = text => log(chalk.rgb(...errorColour)(text));
+const newLine = () => log();
+
 exports.Log = { headerLog, folderLog, fileLog, errorLog, newLine }
 
 // Use cliFormat to split overflowing lines and print as loop
 exports.inlinePrint = (items, header) => {
-    let output = cliFormat.lines(items.join(' '), { ansi: false, justify: true });
+    let output = cliFormat.lines(items.join(' '), { ansi: false });
     printAll(output, header, header === "Files:" ? fileLog : folderLog);
 }
 
