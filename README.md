@@ -38,14 +38,14 @@ Edit `config/config.json` if you're not a fan of cotton candy
 ## Notes
 
 **Trivia:** GitHub recommended 'silver-spork' as a repository name, and it fit the kind of amateur fork of LS I was going for. 
-This is mainly a personal project to familiarize myself with npm & git, but if anyone likes this, feel free to open a feature or enhancement request on the issues board over at my git repo.
+This is mainly a personal project to familiarize myself with npm & git, but maybe someone shares my niche.
 
-### TODO
+### TODO!
+
 Goals for initial "release" - V 1.0.0
-- Update options to override instead of exiting with error
 - Add configuration functionality
 	- Change colors
 	- Default options
 - Make nerd fonts an optional dependency
 
-###### MIT (c) 2020 Tristan Collicott
+###### MIT (c) 2022 Tristan Collicott
