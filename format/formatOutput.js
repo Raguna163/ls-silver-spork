@@ -18,17 +18,27 @@ const newLine = () => log();
 
 exports.Log = { headerLog, folderLog, fileLog, errorLog, newLine }
 
-// Use cliFormat to split overflowing lines and print as loop
-exports.inlinePrint = (items, header) => {
-    let output = cliFormat.lines(items.join(' '), { ansi: false });
-    printAll(output, header, header === "Files:" ? fileLog : folderLog);
-}
-
 const maxLength = arr => arr.reduce((acc, nxt) => nxt.length > acc ? nxt.length : acc, 0);
 
 const printAll = (content, title, log) => {
     headerLog(title);
     content.forEach(line => log(line))
+}
+
+// Sorts files based on number first then alphabetical
+exports.sortFiles = (a, b) => {
+    let [aName, bName] = [a.name.toLowerCase(), b.name.toLocaleLowerCase()];
+    let aMatch = aName.match(/[0-9]+/g);
+    let bMatch = bName.match(/[0-9]+/g);
+    if (aMatch && bMatch) return aMatch - bMatch;
+    if (aName > bName) return 1;
+    if (aName < bName) return -1;
+}
+
+// Use cliFormat to split overflowing lines and print as loop
+exports.inlinePrint = (items, header) => {
+    let output = cliFormat.lines(items.join(' '), { ansi: false });
+    printAll(output, header, header === "Files:" ? fileLog : folderLog);
 }
 
 exports.columnPrint = (folders, files) => {

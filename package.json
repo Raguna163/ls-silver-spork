@@ -1,6 +1,6 @@
 {
   "name": "ls-silver-spork",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "description": "Simple implementation of Ubuntu's LS command for Windows command prompt",
   "main": "index.js",
   "keywords": [ "ls", "cli", "directory" ],

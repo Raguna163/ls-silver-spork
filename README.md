@@ -27,11 +27,11 @@ Edit `config/config.json` if you're not a fan of cotton candy
 
 |OPTION                  |DESCRIPTION                      |NOTES                         |
 |------------------------|---------------------------------|------------------------------|
-|`-d --dir'`             |prints directories               | cannot be used with -f or -s |
-|`-f --file`             |prints files                     | cannot be used with -d       |
+|`-d --dir'`             |prints directories               | overwrites -f, -s, & -e      |
+|`-f --file`             |prints files only                |                              |
 |`-a, --all`             |shows hidden files & directories |                              |
-|`-e, --ext <extension>` |only returns specified extension | cannot be used with -d       |
-|`-s, --size`            |prints file sizes                | cannot be used with -d       |
+|`-e, --ext <extension>` |only returns specified extension |                              |
+|`-s, --size`            |prints file sizes                |                              |
 |`-c, --columns`         |prints as one or two columns     |                              |
 |`-C, --config`          |configure colours (more later)   | overrides all other flags    |
 
@@ -43,13 +43,9 @@ This is mainly a personal project to familiarize myself with npm & git, but if a
 ### TODO
 Goals for initial "release" - V 1.0.0
 - Update options to override instead of exiting with error
-- Re-work output formatting
 - Add configuration functionality
 	- Change colors
 	- Default options
 - Make nerd fonts an optional dependency
-
-#### Known Bugs
-The default formatting has some spacing issues where a space will appear at the beginning of the line, and sometimes the program won't catch a formatting error on the last line. A complete rework is preferable to a band-aid fix.
 
 ###### MIT (c) 2020 Tristan Collicott
