@@ -16,12 +16,12 @@ const formatSize = size => {
 }
 
 // Adds text decorations 
-const formatFile = file => {
+module.exports = formatFile = file => {
 	// Icon wrapper function
 	const i = icon => `[${icon} ${file.name}${formatSize(file.size)}]`.replaceAll(' ', ' ');
 
 	// Adding icons to special directories
-	if (file.isDirectory()) {
+	if (typeof file.isDirectory === "function" && file.isDirectory()) {
 		// Remove all special characters to make name match icon object keys
 		const folder = file.name.replace(/[^a-zA-Z]/g, '').toLowerCase();
 		const folderIcons = Object.keys(icons.folders);
@@ -39,5 +39,3 @@ const formatFile = file => {
 	}
 	return i(icons.file);
 }
-
-module.exports = formatFile;

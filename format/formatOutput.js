@@ -20,8 +20,8 @@ exports.Log = { headerLog, folderLog, fileLog, errorLog, newLine }
 
 const maxLength = arr => arr.reduce((acc, nxt) => nxt.length > acc ? nxt.length : acc, 0);
 
-const printAll = (content, title, log) => {
-    headerLog(title);
+const printAll = (content, header, log) => {
+    headerLog(header);
     content.forEach(line => log(line))
 }
 
@@ -36,11 +36,14 @@ exports.sortFiles = (a, b) => {
 }
 
 // Use cliFormat to split overflowing lines and print as loop
-exports.inlinePrint = (items, header) => {
-    let output = cliFormat.lines(items.join(' '), { ansi: false });
+exports.inlinePrint = (items, header, paddingLeft = "") => {
+    const width = paddingLeft.length ? 70 + paddingLeft.length : process.stdout.columns;
+    const config = { ansi: false, paddingLeft, width, justify: true }
+    let output = cliFormat.lines(items.join(' '), config);
     printAll(output, header, header === "Files:" ? fileLog : folderLog);
 }
 
+// Prints columns sequentially or side-by-side
 exports.columnPrint = (folders, files) => {
     // Check if only one argument was given
     if (!folders) {
