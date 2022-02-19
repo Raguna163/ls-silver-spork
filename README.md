@@ -37,7 +37,7 @@ Edit `config/config.json` if you're not a fan of cotton candy
 
 ## Notes
 
-**Trivia:** GitHub recommended 'silver-spork' as a repository name, and it fit the kind of amateur fork of LS I was going for. 
+**Trivia:** GitHub recommended 'silver-spork' as a repository name, and it fits the amateur fork of LS I was going for. 
 
 This is mainly a personal project to familiarize myself with npm & git.
 
