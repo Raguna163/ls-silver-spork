@@ -26,14 +26,15 @@ Edit `config/config.json` if you're not a fan of cotton candy
 
 |OPTION                     |DESCRIPTION                      |NOTES                         |
 |---------------------------|---------------------------------|------------------------------|
-|`-d --dir'`                |prints directories               | overwrites -f, -s, & -e      |
-|`-f --file`                |prints files only                |                              |
+|`-d --dir'`                |only displays directories        | overwrites -f, -s, & -e      |
+|`-f --file`                |only displays files              |                              |
 |`-a, --all`                |shows hidden files & directories |                              |
 |`-s, --size`               |prints file sizes                |                              |
 |`-c, --columns`            |prints as one or two columns     |                              |
 |`-e, --ext <extension>`    |only returns specified extension |                              |
 |`-r, --recursive [depth]`  |prints directory tree            | defaults to 3                |
-|`-C, --config`             |configure colours (more later)   | overrides all other flags    |
+|`-S, --search <term>`      |filter results by search term    |                              |
+|`-C, --config`             |opens config file                | overrides all other flags    |
 
 ## Notes
 
@@ -44,7 +45,6 @@ This is mainly a personal project to familiarize myself with npm & git.
 ### TODO
 Goals for initial "release" - V 1.0.0
 - Add configuration functionality
-	- Change colors
 	- Default options
 - Make nerd fonts an optional dependency
 
