@@ -1,95 +1,33 @@
-// Node Modules
-const fs = require('fs');
+const runtime = process.hrtime();
 const { spawn } = require('child_process');
-const { join, parse } = require('path');
+const { join } = require('path');
 const { program } = require('commander');
-// Dev Modules
+const { Log, Print, Options } = require('./format/formatOutput');
+const readDirectory = require('./src/readDirectory');
 const formatFile = require('./format/formatFile');
-const { Log, Print, sortFiles } = require('./format/formatOutput');
-const { headerLog, errorLog } = Log;
+const { headerLog, errorLog, infoLog } = Log;
 
-
-// Configure Commander module
-program.name("ls").usage("[-o, --options] [directory]").version('0.15.0');
+// Commander module
+program.name("ls").usage("[-o, --options] [directory]").version('1.0.0');
 program
 	.option('-d, --dir','only displays directories (overwrites -f, -s, & -e)')
 	.option('-f, --file','only displays files')
 	.option('-a, --all', 'shows hidden files & directories')
-	.option('-s, --size','displays file sizes')
+	.option('-s, --size','adds file sizes')
+	.option('-i, --info','displays extra info')
 	.option('-c, --columns','displays as one or two columns')
-	.option('-r, --recursive [depth]', 'prints directory tree (default:3)')
-	.option('-e, --ext <extension>', 'filter results by extension')
+	.option('-t, --tree [depth]', `prints directory tree (default:${Options.defaultDepth})`)
+	.option('-e, --ext <ext>', 'filter results by extension')
 	.option('-S, --search <term>', 'filter results by search term')
 	.option('-C, --config', 'opens config file')
 	.parse(process.argv);
 	
-// Overwrite options that don't work well together
+// Overwrite options that don't work together
 if (program.dir) program.size = program.file = program.ext = false;
 
-// Helper function for readDirectory to filter file types
-const fileOrDir = (files, func) => files.reduce((acc,nxt,idx) => nxt[func]() ? [...acc, files[idx].name] : acc, []);
+const XOR = (a,b) => ( a && !b ) || ( !a && b ); 
 
-// Get list of filenames and separate files & folders
-async function readDirectory(targetDir, depth) {
-	let folders, files, filenames;
-	try {
-		filenames = await fs.promises.readdir(targetDir, { withFileTypes: true });
-	} catch (err) {
-		if (err.code === "EPERM") errorLog("\nPermission denied");
-		else if (err.code === "ENOENT") errorLog("\nDirectory not found");
-		else errorLog("Error reading directory: " + err.message);
-	}
-
-	// Filters based on options given
-	if (!program.all) {
-		filenames = filenames.filter(file => !file.name.startsWith('.'));
-	}
-	if (program.ext) {
-		// Optionally adds dot to extension search
-		program.ext = program.ext.startsWith('.') ? program.ext : `.${program.ext}`;
-		filenames = filenames.filter(file => parse(file.name).ext === program.ext);
-	}
-	if (program.search) {
-		let Regex = new RegExp(`\\S*${program.search}\\S*`, 'g');
-		filenames = filenames.filter(file => file.name.match(Regex));
-	}
-
-	// See ./format/formatOutput.js for sort method
-	filenames.sort(sortFiles);
-
-	// Adds size property to each filename if desired
-	if (program.size) {
-		try {
-			const fileStats = filenames.map(filename => fs.promises.lstat(join(targetDir, filename.name)));
-			const stats = await Promise.all(fileStats);
-			filenames.forEach((file, idx) => file.size = stats[idx].size);
-		} catch (err) {
-			if (err.code === "EPERM") errorLog("\nPermission denied");
-			errorLog("Error retrieving size: " + err.message);
-		}
-	}
-	
-	if (program.recursive) {
-		files = !program.dir ? fileOrDir(filenames, 'isFile') : [];
-		folders = !program.file ? fileOrDir(filenames, 'isDirectory') : [];
-		if (folders.length <= 0 || depth === 0) {
-			files = files.length > 0 ? files : ["Empty"];
-			return { dir: targetDir, files };
-		} else {
-			const recurse = folders.map((folder) => readDirectory(`${targetDir}\\${folder}`, depth - 1));
-			const data = await Promise.all(recurse);
-			return { dir: targetDir, data, files }
-		}
-	}
-
-	// Adds decorations and filters output
-	filenames.forEach(file => file.name = formatFile(file));
-	files = !program.dir ? fileOrDir(filenames, 'isFile') : [];
-	folders = !program.file ? fileOrDir(filenames, 'isDirectory') : [];
-	return { folders, files };
-}
-
-// Main functionality
+// Main function
 (async () => {
 	try {
 		if (program.config) {
@@ -100,26 +38,28 @@ async function readDirectory(targetDir, depth) {
 
 		const targetDir = join(process.cwd(), ...program.args);
 
-		let { recursive } = program;
-		if (recursive) {
-			const depth = recursive === true ? 3 : recursive;
-			const FileTree = await readDirectory(targetDir, depth - 1);
+		let { tree } = program;
+		if (tree) {
+			const depth = tree === true ? Options.defaultDepth : recursive;
+			const FileTree = await readDirectory(targetDir, program, depth - 1);
 			Print.recursive([FileTree], targetDir);
 			return;
 		}
 
-		const { folders, files } = await readDirectory(targetDir);
+		const { folders, files } = await readDirectory(targetDir, program);
+		const [ noFiles, noFolders ] = [ !files.length, !folders.length ]
 
-		if (!files.length && program.file) {
+		if (noFiles && program.file) {
 			headerLog(`\nThere are no files in ${targetDir}`);
 			return;
 		}
-		else if (!folders.length && program.dir) {
+		else if (noFolders && program.dir) {
 			headerLog(`\nThere are no folders in ${targetDir}`);
 			return;
 		}
-		else if (!folders.length && !files.length) {
+		else if (noFolders && noFiles) {
 			if (program.search) headerLog(`\n"${program.search}" not found in ${targetDir}`);
+			else if (program.ext) headerLog(`\n"${program.ext}" not found in ${targetDir}`);
 			else headerLog(`\nThere are no files or folders in ${targetDir}`);
 			return;
 		}
@@ -127,19 +67,24 @@ async function readDirectory(targetDir, depth) {
 		headerLog(`\n${targetDir}:`);
 		if (program.size) headerLog(`Folders: ${folders.length} | Files: ${files.length}\n`);
 
-		if (program.columns) {
-			if (program.dir || !files.length) Print.column(folders, null);
-			else if (program.file || !folders.length) Print.column(null, files);
+		if (XOR(program.columns, Options.columns) || Options.columns === 1) {
+			if (program.dir || noFiles) Print.column(folders, null);
+			else if (program.file || noFolders) Print.column(null, files);
 			else Print.column(folders, files);
 			return;
 		}
 		
-		if (!program.file && folders.length) {
+		if (folders.length) {
 			Print.inline(folders, "Folders:");
 		}
-		if (!program.dir && files.length) {
-			if (folders.length && !program.file) { Log.newLine() }
+		if (files.length) {
+			if (folders.length) { Log.newLine() }
 			Print.inline(files, "Files:");
+		}
+
+		if (program.info || Options.info) {
+			let time = process.hrtime(runtime)[1] / 1000000 + " ms";
+			infoLog("\n(" + time + ")");
 		}
 	} catch (err) {
 		errorLog(err.message);

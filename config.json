@@ -1,6 +1,22 @@
 {
-    "headerColour": [255,255,255],
-    "folderColour": [173,235,235],
-    "fileColour": [235,173,235],
-    "errorColour": [242,56,56]
+    "Colours": {
+        "header": [ 255 , 255 , 255],
+        "folder": [173 , 235 , 235],
+        "file": [235 , 173 , 235],
+        "error": [242 , 56 , 56],
+        "info": [175 , 175 , 175] 
+    },
+    "Options": {
+        "brackets": {
+            "left": "[",
+            "right": "]"
+        },
+        "nerdFonts": true,
+        "columns": false,
+        "size": false,
+        "info": false,
+        "all": false,
+        "noColour": false,
+        "defaultDepth": 3
+    }
 }

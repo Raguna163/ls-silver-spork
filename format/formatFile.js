@@ -1,7 +1,6 @@
-// Node Modules
 const { parse } = require('path');
-// Dev Modules
 const { icons, fileTypes } = require('./formatData');
+const { Options } = require('./formatOutput');
 
 // Makes file sizes human readable
 const GB = 1073741824;
@@ -17,8 +16,11 @@ const formatSize = size => {
 
 // Adds text decorations 
 module.exports = formatFile = file => {
-	// Icon wrapper function
-	const i = icon => `[${icon} ${file.name}${formatSize(file.size)}]`.replaceAll(' ', ' ');
+	const { left, right } = Options.brackets;
+	const i = icon => (left + (icon ? icon + " " : "") + file.name + formatSize(file.size) + right).replaceAll(' ', '\u2009');
+	// const i = icon => `[${icon} ${file.name}${formatSize(file.size)}]`.replaceAll(' ', ' ');
+
+	if (!Options.nerdFonts) return i(undefined);
 
 	// Adding icons to special directories
 	if (typeof file.isDirectory === "function" && file.isDirectory()) {
