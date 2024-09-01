@@ -20,12 +20,13 @@ program
 	.option('-e, --ext <ext>', 'filter results by extension')
 	.option('-S, --search <term>', 'filter results by search term')
 	.option('-C, --config', 'opens config file')
+	.option('--clear', 'clears screen before listing directory')
 	.parse(process.argv);
-	
+
 // Overwrite options that don't work together
 if (program.dir) program.size = program.file = program.ext = false;
 
-const XOR = (a,b) => ( a && !b ) || ( !a && b ); 
+const XOR = (a,b) => ( a && !b ) || ( !a && b );
 
 // Main function
 (async () => {
@@ -35,6 +36,8 @@ const XOR = (a,b) => ( a && !b ) || ( !a && b );
 			spawn("notepad", file, { detached: true }).on('spawn', process.exit);
 			return;
 		}
+
+    if (program.clear) process.stdout.write('\x1Bc');
 
 		const targetDir = join(process.cwd(), ...program.args);
 
@@ -73,7 +76,7 @@ const XOR = (a,b) => ( a && !b ) || ( !a && b );
 			else Print.column(folders, files);
 			return;
 		}
-		
+
 		if (folders.length) {
 			Print.inline(folders, "Folders:");
 		}
