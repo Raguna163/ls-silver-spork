@@ -1,16 +1,16 @@
-const fs = require('fs');
-const { join, parse } = require('path');
-const formatFile = require('../format/formatFile');
-const { Log, sortFiles, Options } = require('../format/formatOutput');
+import fs from 'fs';
+import { join, parse } from 'path';
+import formatFile from '../format/formatFile.js';
+import { Log, sortFiles, Options } from '../format/formatOutput.js';
 const { errorLog } = Log;
 
-const XOR = (a, b) => (a && !b) || (!a && b); 
+const XOR = (a, b) => (a && !b) || (!a && b);
 
 // Helper function for readDirectory to filter file types
 const fileOrDir = (files, func) => files.reduce((acc, nxt, idx) => nxt[func]() ? [...acc, files[idx].name] : acc, []);
 
 // Get list of filenames and separate files & folders
-const readDirectory = async (targetDir, program, depth) => {
+export default async function readDirectory (targetDir, program, depth) {
   let folders, files, filenames;
   try {
     filenames = await fs.promises.readdir(targetDir, { withFileTypes: true });
@@ -68,5 +68,3 @@ const readDirectory = async (targetDir, program, depth) => {
   folders = !program.file ? fileOrDir(filenames, 'isDirectory') : [];
   return { folders, files };
 }
-
-module.exports = readDirectory;

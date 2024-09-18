@@ -1,6 +1,6 @@
-const { parse } = require('path');
-const { icons, fileTypes } = require('./formatData');
-const { Options } = require('./formatOutput');
+import { parse } from 'path';
+import { icons, fileTypes } from './formatData.js';
+import { Options } from './formatOutput.js';
 
 // Makes file sizes human readable
 const GB = 1073741824;
@@ -14,8 +14,8 @@ const formatSize = size => {
 	return ''
 }
 
-// Adds text decorations 
-module.exports = formatFile = file => {
+// Adds text decorations
+export default function formatFile (file) {
 	const { left, right } = Options.brackets;
 	const i = icon => (left + (icon ? icon + " " : "") + file.name + formatSize(file.size) + right).replaceAll(' ', '\u2009');
 	// const i = icon => `[${icon} ${file.name}${formatSize(file.size)}]`.replaceAll(' ', ' ');

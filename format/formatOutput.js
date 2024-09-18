@@ -1,7 +1,8 @@
-const fs = require('fs');
-const chalk = require('chalk');
-const { join, dirname } = require('path');
-const cliFormat = require('cli-format');
+import fs from 'fs';
+import chalk from 'chalk';
+import { join, dirname } from 'path';
+import cliFormat from 'cli-format';
+const __dirname = import.meta.dirname;
 const consoleWidth = process.stdout.columns;
 
 // Load console colours from config file
@@ -65,13 +66,13 @@ const column = (folders, files) => {
     }
     headerLog(`Folders:${" ".repeat(column1 - 8)}Files:`);
     const height = maxLength([folders, files]);
-    
+
     for (let idx = 0; idx < height; idx++) {
-        if (folders[idx]) folderLog(folders[idx] + "\033[s");
-        else log("\033[s");
+        if (folders[idx]) folderLog(folders[idx] + "\x1B[s");
+        else log("\x1B[s");
         if (files[idx]) {
             const spaces = " ".repeat(column1 - (folders[idx] ? folders[idx].length : 0));
-            process.stdout.write("\033[u\033[1A");
+            process.stdout.write("\x1B[u\x1B[1A");
             fileLog(spaces + files[idx]);
         }
     }
@@ -99,4 +100,4 @@ const recursive = (FileTree, currentDir) => {
 
 const Print = { recursive, inline, column, printAll }
 
-module.exports = { Print, Log, sortFiles, Options }
+export { Print, Log, sortFiles, Options }

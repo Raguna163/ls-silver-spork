@@ -1,5 +1,6 @@
 // Source: https://www.nerdfonts.com/cheat-sheet
-exports.icons = {
+
+export const icons = {
   archive: "\uF1C6",
   audio: "\uF1C7",
   binary: "\uF471",
@@ -30,13 +31,13 @@ exports.icons = {
     users: "\uF74B",
     videos: "\uF880"
   },
-  
+
 	unique: {
-    ai: "\uE7B4",    
-    c: "\uFB70",    
+    ai: "\uE7B4",
+    c: "\uFB70",
     cs: "\uF81A",
     css: "\uE614",
-    cpp: "\uFB71", 
+    cpp: "\uFB71",
     html: "\uE736",
     java: "\uE738",
     js: "\uE74E",
@@ -52,7 +53,7 @@ exports.icons = {
   }
 }
 
-exports.fileTypes = {
+export const fileTypes = {
   audio: ['flac', 'mp3', 'wav', 'wma'],
   archive: ['7z', 'rar', 'zip'],
   binary: ['bak', 'bin', 'exe', 'iso', 'msi'],

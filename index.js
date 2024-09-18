@@ -1,14 +1,14 @@
 const runtime = process.hrtime();
-const { spawn } = require('child_process');
-const { join } = require('path');
-const { program } = require('commander');
-const { Log, Print, Options } = require('./format/formatOutput');
-const readDirectory = require('./src/readDirectory');
-const formatFile = require('./format/formatFile');
+import { spawn } from 'child_process';
+import { join } from 'path';
+import { program } from 'commander';
+import { Log, Print, Options } from './format/formatOutput.js';
+import readDirectory from './src/readDirectory.js';
+const __dirname = import.meta.dirname;
 const { headerLog, errorLog, infoLog } = Log;
 
 // Commander module
-program.name("ls").usage("[-o, --options] [directory]").version('1.0.0');
+program.name("ls").usage("[-o, --options] [directory]").version('1.1.0');
 program
 	.option('-d, --dir','only displays directories (overwrites -f, -s, & -e)')
 	.option('-f, --file','only displays files')
