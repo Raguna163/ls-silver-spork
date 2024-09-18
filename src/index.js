@@ -1,15 +1,15 @@
 const runtime = process.hrtime();
 import { spawn } from 'child_process';
 import { join } from 'path';
-import { program } from 'commander';
+import { program as commander } from 'commander';
 import { Log, Print, Options } from './format/formatOutput.js';
 import readDirectory from './readDirectory.js';
 const __dirname = import.meta.dirname;
 const { headerLog, errorLog, infoLog } = Log;
 
 // Commander module
-program.name("ls").usage("[-o, --options] [directory]").version('1.1.0');
-program
+commander.name("ls").usage("[-o, --options] [directory]").version('1.1.0');
+commander
 	.option('-d, --dir','only displays directories (overwrites -f, -s, & -e)')
 	.option('-f, --file','only displays files')
 	.option('-a, --all', 'shows hidden files & directories')
@@ -24,55 +24,55 @@ program
 	.parse(process.argv);
 
 // Overwrite options that don't work together
-if (program.dir) program.size = program.file = program.ext = false;
+if (commander.dir) commander.size = commander.file = commander.ext = false;
 
 const XOR = (a,b) => ( a && !b ) || ( !a && b );
 
 // Main function
 (async () => {
 	try {
-		if (program.config) {
+		if (commander.config) {
 			let file = [__dirname + '\\config.json']
 			spawn("notepad", file, { detached: true }).on('spawn', process.exit);
 			return;
 		}
 
-    if (program.clear) process.stdout.write('\x1Bc');
+    if (commander.clear) process.stdout.write('\x1Bc');
 
-		const targetDir = join(process.cwd(), ...program.args);
+		const targetDir = join(process.cwd(), ...commander.args);
 
-		let { tree } = program;
+		let { tree } = commander;
 		if (tree) {
 			const depth = tree === true ? Options.defaultDepth : recursive;
-			const FileTree = await readDirectory(targetDir, program, depth - 1);
+			const FileTree = await readDirectory(targetDir, commander, depth - 1);
 			Print.recursive([FileTree], targetDir);
 			return;
 		}
 
-		const { folders, files } = await readDirectory(targetDir, program);
+		const { folders, files } = await readDirectory(targetDir, commander);
 		const [ noFiles, noFolders ] = [ !files.length, !folders.length ]
 
-		if (noFiles && program.file) {
+		if (noFiles && commander.file) {
 			headerLog(`\nThere are no files in ${targetDir}`);
 			return;
 		}
-		else if (noFolders && program.dir) {
+		else if (noFolders && commander.dir) {
 			headerLog(`\nThere are no folders in ${targetDir}`);
 			return;
 		}
 		else if (noFolders && noFiles) {
-			if (program.search) headerLog(`\n"${program.search}" not found in ${targetDir}`);
-			else if (program.ext) headerLog(`\n"${program.ext}" not found in ${targetDir}`);
+			if (commander.search) headerLog(`\n"${commander.search}" not found in ${targetDir}`);
+			else if (commander.ext) headerLog(`\n"${commander.ext}" not found in ${targetDir}`);
 			else headerLog(`\nThere are no files or folders in ${targetDir}`);
 			return;
 		}
 
 		headerLog(`\n${targetDir}:`);
-		if (program.size) headerLog(`Folders: ${folders.length} | Files: ${files.length}\n`);
+		if (commander.size) headerLog(`Folders: ${folders.length} | Files: ${files.length}\n`);
 
-		if (XOR(program.columns, Options.columns) || Options.columns === 1) {
-			if (program.dir || noFiles) Print.column(folders, null);
-			else if (program.file || noFolders) Print.column(null, files);
+		if (XOR(commander.columns, Options.columns) || Options.columns === 1) {
+			if (commander.dir || noFiles) Print.column(folders, null);
+			else if (commander.file || noFolders) Print.column(null, files);
 			else Print.column(folders, files);
 			return;
 		}
@@ -85,7 +85,7 @@ const XOR = (a,b) => ( a && !b ) || ( !a && b );
 			Print.inline(files, "Files:");
 		}
 
-		if (program.info || Options.info) {
+		if (commander.info || Options.info) {
 			let time = process.hrtime(runtime)[1] / 1000000 + " ms";
 			infoLog("\n(" + time + ")");
 		}
