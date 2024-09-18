@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { join, parse } from 'path';
-import formatFile from '../format/formatFile.js';
-import { Log, sortFiles, Options } from '../format/formatOutput.js';
+import formatFile from './format/formatFile.js';
+import { Log, sortFiles, Options } from './format/formatOutput.js';
 const { errorLog } = Log;
 
 const XOR = (a, b) => (a && !b) || (!a && b);
