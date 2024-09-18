@@ -2,8 +2,8 @@ const runtime = process.hrtime();
 import { spawn } from 'child_process';
 import { join } from 'path';
 import { program as commander } from 'commander';
-import { Log, Print, Options } from './format/formatOutput.js';
-import readDirectory from './readDirectory.js';
+import { Log, Print, Options } from './src/format/formatOutput.js';
+import readDirectory from './src/dir/readDirectory.js';
 const __dirname = import.meta.dirname;
 const { headerLog, errorLog, infoLog } = Log;
 

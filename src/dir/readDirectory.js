@@ -1,38 +1,24 @@
-import fs from 'fs';
-import { join, parse } from 'path';
+import { join } from 'path';
 import formatFile from '../format/formatFile.js';
-import { Log, sortFiles, Options } from '../format/formatOutput.js';
+import { Log, Options } from '../format/formatOutput.js';
+import { checkFilters, separateDirsFromFiles, XOR } from './filterDirectory.js';
+import { sortFiles } from '../format/sort.js';
+import { readdir, stat } from 'fs/promises';
 const { errorLog } = Log;
-
-const XOR = (a, b) => (a && !b) || (!a && b);
-
-// Helper function for readDirectory to filter file types
-const fileOrDir = (files, func) => files.reduce((acc, nxt, idx) => nxt[func]() ? [...acc, files[idx].name] : acc, []);
 
 // Get list of filenames and separate files & folders
 export default async function readDirectory (targetDir, options, depth) {
   let folders, files, filenames;
   try {
-    filenames = await fs.promises.readdir(targetDir, { withFileTypes: true });
+    filenames = await readdir(targetDir, { withFileTypes: true });
   } catch (err) {
     if (err.code === "EPERM") errorLog("\nPermission denied");
     else if (err.code === "ENOENT") errorLog("\nDirectory not found");
     else errorLog("Error reading directory: " + err.message);
   }
 
-  // Filters based on options given
-  if (XOR(!options.all, Options.all)) {
-    filenames = filenames.filter(file => !file.name.startsWith('.'));
-  }
-  if (options.ext) {
-    // Optionally adds dot to extension search
-    options.ext = options.ext.startsWith('.') ? options.ext : `.${options.ext}`;
-    filenames = filenames.filter(file => parse(file.name).ext === options.ext);
-  }
-  if (options.search) {
-    let Regex = new RegExp(`\\S*${options.search}\\S*`, 'g');
-    filenames = filenames.filter(file => file.name.match(Regex));
-  }
+  // Perform various filters depending on command line arguments
+  filenames = checkFilters(filenames, options);
 
   // See ./format/formatOutput.js for sort method
   filenames.sort(sortFiles);
@@ -40,7 +26,7 @@ export default async function readDirectory (targetDir, options, depth) {
   // Adds size property to each filename if desired
   if (XOR(options.size, Options.size)) {
     try {
-      const fileStats = filenames.map(filename => fs.promises.lstat(join(targetDir, filename.name)));
+      const fileStats = filenames.map(filename => stat(join(targetDir, filename.name)));
       const stats = await Promise.all(fileStats);
       filenames.forEach((file, idx) => file.size = stats[idx].size);
     } catch (err) {
@@ -49,10 +35,12 @@ export default async function readDirectory (targetDir, options, depth) {
     }
   }
 
+  // Recursively create file tree
   if (options.tree) {
-    files = !options.dir ? fileOrDir(filenames, 'isFile') : [];
-    folders = !options.file ? fileOrDir(filenames, 'isDirectory') : [];
-    if (folders.length <= 0 || depth === 0) {
+    [files, folders] = separateDirsFromFiles(filenames);
+    if (options.dir) files = [];
+    if (options.file) folders = [];
+    if (!folders.length || depth === 0) {
       files = files.length > 0 ? files : ["Empty"];
       return { dir: targetDir, files };
     } else {
@@ -64,7 +52,8 @@ export default async function readDirectory (targetDir, options, depth) {
 
   // Adds decorations and filters output
   filenames.forEach(file => file.name = formatFile(file));
-  files = !options.dir ? fileOrDir(filenames, 'isFile') : [];
-  folders = !options.file ? fileOrDir(filenames, 'isDirectory') : [];
+  [files, folders] = separateDirsFromFiles(filenames);
+  if (options.dir) files = [];
+  if (options.file) folders = [];
   return { folders, files };
 }

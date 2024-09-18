@@ -6,7 +6,7 @@ const __dirname = import.meta.dirname;
 const consoleWidth = process.stdout.columns;
 
 // Load console colours from config file
-const config = JSON.parse(fs.readFileSync(join(__dirname, '../config.json')));
+const config = JSON.parse(fs.readFileSync(join(__dirname, '../../config.json')));
 const { Colours, Options } = config;
 
 // Wrapper functions for Chalk module
@@ -23,14 +23,15 @@ const Log = { headerLog, folderLog, fileLog, errorLog, newLine, infoLog }
 const maxLength = arr => arr.reduce((acc, nxt) => nxt.length > acc ? nxt.length : acc, 0);
 
 // Sorts files based on number first then alphabetical
-const sortFiles = (a, b) => {
-    let RegEx = /^[0-9]+/g;
-    let [aName, bName] = [a.name.toLowerCase(), b.name.toLowerCase()];
-    let [aMatch, bMatch] = [aName.match(RegEx), bName.match(RegEx)];
-    if (aMatch && bMatch) return aMatch - bMatch;
-    if (aName > bName) return 1;
-    if (aName < bName) return -1;
-}
+//const sortFiles = (a, b) => {
+//    let RegEx = /^[0-9]+/g;
+//    let [aName, bName] = [a.name.toLowerCase(), b.name.toLowerCase()];
+//    let [aMatch, bMatch] = [aName.match(RegEx), bName.match(RegEx)];
+//    if (aMatch && bMatch) return aMatch - bMatch;
+//    if (aName > bName) return 1;
+//    if (aName < bName) return -1;
+//}
+
 
 const printAll = (content, header, log) => {
     headerLog(header);
@@ -100,4 +101,4 @@ const recursive = (FileTree, currentDir) => {
 
 const Print = { recursive, inline, column, printAll }
 
-export { Print, Log, sortFiles, Options }
+export { Print, Log, Options }
