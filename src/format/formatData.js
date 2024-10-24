@@ -1,15 +1,15 @@
 // Source: https://www.nerdfonts.com/cheat-sheet
-
+// [TODO] : Find better way to source icons
 export const icons = {
   archive: "\uF1C6",
   audio: "\uF1C7",
   binary: "\uF471",
-  book: "\uF02D",
+  book: "\uF405",
   code: "\uF121",
-  drawing: "\uF6DD",
+  drawing: "\uF01DE",
   excel: "\uF1C3",
   folder: "\uF115",
-  font: "\uFBD4",
+  font: "\uF031",
   file: "\uF016",
   image: "\uF1C5",
   text: "\uF0F6",
@@ -18,35 +18,36 @@ export const icons = {
   word: "\uF1C2",
 
   folders: {
-    documents: "\uF719",
-    downloads: "\uF74C",
-    dropbox: "\uF6E2",
-    games: "\uF795",
-    git: "\uE702",
+    desktop: "\uF4A9",
+    documents: "\uF1517",
+    downloads: "\uF409",
+    dropbox: "\uF16B",
+    games: "\uEC17",
+    git: "\uF1D3",
     googledrive: "\uE731",
     music: "\uF001",
-    nodemodules: "\uF898",
-    pictures: "\uF74E",
-    savedgames: "\uF795",
-    users: "\uF74B",
-    videos: "\uF880"
+    nodemodules: "\uED0D",
+    pictures: "\uF03E",
+    savedgames: "\uEC17",
+    searches: "\uF002",
+    users: "\uF0C0",
+    videos: "\uF52C"
   },
 
 	unique: {
     ai: "\uE7B4",
-    c: "\uFB70",
-    cs: "\uF81A",
-    css: "\uE614",
-    cpp: "\uFB71",
+    c: "\uE649",
+    css: "\uE749",
+    cpp: "\uE646",
     html: "\uE736",
-    java: "\uE738",
+    java: "\uEDAF",
     js: "\uE74E",
     json: "\uE60B",
     jsx: '\uE7bA',
     md: "\uE73E",
-    pdf: "\uF411",
+    pdf: "\uF1C1",
     psd: "\uE7B8",
-    py: "\uF81F",
+    py: "\uED1B",
     sass: "\uE74b",
     scss: "\uE74b",
     ts: "\uE628",
@@ -68,4 +69,21 @@ export const fileTypes = {
   video: ['3gp', 'avi', 'flv', 'mkv', 'mov', 'mp4', 'mpg', 'mpeg', 'wmv'],
   word: ['doc', 'docx', 'docm', 'dotm', 'dotx'],
   unique: ['ai','c', 'cs', 'css', 'cpp', 'html', 'java', 'json', 'js', 'jsx', 'md', 'pdf', 'psd', 'py', 'ts', 'sass', 'scss']
+}
+
+export function printAllIcons () {
+  for (const elem in icons) {
+    const value = icons[elem];
+    if (value instanceof Object) {
+      for (const subElem in value) {
+        const subValue = value[subElem];
+        printIcon(subElem, subValue)
+      }
+    }
+    else printIcon(elem, value);
+  }
+}
+
+function printIcon (name, value) {
+  console.log(`${name}: ${value}`);
 }

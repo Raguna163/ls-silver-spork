@@ -4,6 +4,7 @@ import { join } from 'path';
 import { program as commander } from 'commander';
 import { Log, Print, Options } from './src/format/formatOutput.js';
 import readDirectory from './src/dir/readDirectory.js';
+import { printAllIcons } from './src/format/formatData.js';
 const __dirname = import.meta.dirname;
 const { headerLog, errorLog, infoLog } = Log;
 
@@ -21,6 +22,7 @@ commander
 	.option('-S, --search <term>', 'filter results by search term')
 	.option('-C, --config', 'opens config file')
 	.option('--clear', 'clears screen before listing directory')
+	.option('--debug', 'dumps info about the program')
 	.parse(process.argv);
 
 // Overwrite options that don't work together
@@ -46,6 +48,11 @@ const XOR = (a,b) => ( a && !b ) || ( !a && b );
 			const depth = tree === true ? Options.defaultDepth : recursive;
 			const FileTree = await readDirectory(targetDir, commander, depth - 1);
 			Print.recursive([FileTree], targetDir);
+			return;
+		}
+
+		if (commander.debug) {
+			printAllIcons();
 			return;
 		}
 
