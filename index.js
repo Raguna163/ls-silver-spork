@@ -74,7 +74,6 @@ const XOR = (a,b) => ( a && !b ) || ( !a && b );
 			return;
 		}
 
-		headerLog(`\n${targetDir}:`);
 		if (commander.size) headerLog(`Folders: ${folders.length} | Files: ${files.length}\n`);
 
 		if (XOR(commander.columns, Options.columns) || Options.columns === 1) {
@@ -88,7 +87,6 @@ const XOR = (a,b) => ( a && !b ) || ( !a && b );
 			Print.inline(folders, "Folders:");
 		}
 		if (files.length) {
-			if (folders.length) { Log.newLine() }
 			Print.inline(files, "Files:");
 		}
 

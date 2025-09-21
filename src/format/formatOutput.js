@@ -33,8 +33,7 @@ const maxLength = arr => arr.reduce((acc, nxt) => nxt.length > acc ? nxt.length 
 //}
 
 
-const printAll = (content, header, log) => {
-    headerLog(header);
+const printAll = (content, log) => {
     content.forEach(line => log(line));
 }
 
@@ -44,25 +43,25 @@ const inline = (items, header, paddingLeft = "") => {
     const width = length ? 70 + length : consoleWidth;
     const config = { ansi: false, paddingLeft, width }
     let output = cliFormat.lines(items.join(' '), config);
-    printAll(output, header, header === "Files:" ? fileLog : folderLog);
+    printAll(output, header === "Files:" ? fileLog : folderLog);
 }
 
 // Prints columns sequentially or side-by-side
 const column = (folders, files) => {
     if (!folders) {
-        printAll(files, "Files:", fileLog);
+        printAll(files, fileLog);
         return;
     } else if (!files) {
-        printAll(folders, "Folders:", folderLog);
+        printAll(folders, folderLog);
         return;
     }
 
     const column1 = maxLength(folders) + 5;
     const column2 = maxLength(files);
     if (column1 + column2 > consoleWidth || Options.columns === 1) {
-        printAll(folders, "Folders:", folderLog);
+        printAll(folders, folderLog);
         newLine();
-        printAll(files, "Files:", fileLog);
+        printAll(files, fileLog);
         return;
     }
     headerLog(`Folders:${" ".repeat(column1 - 8)}Files:`);
